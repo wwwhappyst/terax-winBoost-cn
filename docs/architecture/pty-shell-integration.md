@@ -99,6 +99,6 @@ Terminal input sends `\r` (CR), not `\n` (LF). PowerShell on Windows requires CR
 ## See also
 
 - [`TERAX.md`](../../TERAX.md) - the architecture source of truth
-- [`docs/README.md`](../README.md) - index of contributor guides
+- [Contributor guides](../../CONTRIBUTING.md#contributor-guides) - index of contributor guides
 - [Two-process model](two-process-model.md) - IPC boundary and command catalog
 - [Terminal renderer pool](terminal-renderer-pool.md) - slot pooling and the DormantRing

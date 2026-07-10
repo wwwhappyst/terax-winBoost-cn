@@ -130,6 +130,6 @@ Three distinct surfaces:
 ## See also
 
 - [`TERAX.md`](../../TERAX.md) - the architecture source of truth
-- [`docs/README.md`](../README.md) - index of contributor guides
+- [Contributor guides](../../CONTRIBUTING.md#contributor-guides) - index of contributor guides
 - [PTY shell integration](pty-shell-integration.md) - how sessions and shell integration work
 - [Security model](security-model.md) - the boundaries every command must respect

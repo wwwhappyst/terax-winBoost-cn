@@ -91,6 +91,6 @@ The agent detector (`src-tauri/src/modules/pty/agent_detect.rs`) is armed by `OS
 ## See also
 
 - [`TERAX.md`](../../TERAX.md) - the architecture source of truth
-- [`docs/README.md`](../README.md) - index of contributor guides
+- [Contributor guides](../../CONTRIBUTING.md#contributor-guides) - index of contributor guides
 - [Two-process model](two-process-model.md) - IPC boundary and command catalog
 - [AI subsystem](ai-subsystem.md) - tools, approval flow, and provider handling

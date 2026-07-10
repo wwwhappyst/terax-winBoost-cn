@@ -164,7 +164,7 @@ BYOK. Cloud providers via `@ai-sdk/*`: **OpenAI, Anthropic, Google, xAI, Cerebra
 
 Long-form contributor guides live under `docs/`. These guides elaborate on `TERAX.md`; if anything conflicts, `TERAX.md` wins.
 
-- `docs/README.md` - index of contributor guides
+- `CONTRIBUTING.md#contributor-guides` - index of contributor guides
 - `docs/architecture/two-process-model.md` - IPC boundary and command reference
 - `docs/architecture/pty-shell-integration.md` - PTY, shell init scripts, OSC, ConPTY, Job Object
 - `docs/architecture/security-model.md` - consolidated security model and boundaries

@@ -92,6 +92,6 @@ AI-proposed file edits open in an `ai-diff` tab. The user accepts or rejects per
 ## See also
 
 - [`TERAX.md`](../../TERAX.md) - the architecture source of truth
-- [`docs/README.md`](../README.md) - index of contributor guides
+- [Contributor guides](../../CONTRIBUTING.md#contributor-guides) - index of contributor guides
 - [Two-process model](two-process-model.md) - IPC boundary and command catalog
 - [Security model](security-model.md) - the boundaries every tool must respect

@@ -22,7 +22,23 @@ pnpm tauri dev
 
 Prereqs: Rust (stable), Node 20+, pnpm, plus your platform's [Tauri prerequisites](https://tauri.app/start/prerequisites/).
 
-For the architecture and how to contribute safely, see [TERAX.md](TERAX.md) and the [docs/ index](docs/README.md).
+For the architecture and how to contribute safely, see [TERAX.md](TERAX.md) and [Contributor guides](#contributor-guides) below.
+
+## Contributor guides
+
+Long-form guides under `docs/` elaborate on [TERAX.md](TERAX.md). If a guide conflicts with `TERAX.md`, `TERAX.md` wins.
+
+### Architecture guides
+
+- [Two-process model and IPC command reference](docs/architecture/two-process-model.md) - Rust owns all OS access; the webview talks through `invoke()`. Command catalog and how to add a new command.
+- [PTY shell integration](docs/architecture/pty-shell-integration.md) - PTY sessions, shell init scripts, OSC 7 / 133, ConPTY, SPAWN_LOCK, Job Object, WSL.
+- [Security model](docs/architecture/security-model.md) - deny-list, SSRF guard, workspace authorization, AI tool approval, IPC allowlist, OSC trust, keychain handling.
+- [AI subsystem](docs/architecture/ai-subsystem.md) - providers, agent, sub-agents, sessions, composer, tools, edit diffs, live context bridge. Includes a walkthrough for adding a new provider.
+- [Terminal renderer pool](docs/architecture/terminal-renderer-pool.md) - slot pooling, the DormantRing, and the never-serialize-mid-command invariant.
+
+### Contributing guides
+
+- [Testing](docs/contributing/testing.md) - the testing contract, how to run checks, and what makes a good core-subsystem test.
 
 ## Where to discuss
 

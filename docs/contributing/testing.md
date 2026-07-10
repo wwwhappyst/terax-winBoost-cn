@@ -79,4 +79,4 @@ When testing `src/modules/ai/lib/security.ts` or the Rust equivalents, cover:
 
 - [`TERAX.md`](../../TERAX.md) - the architecture source of truth
 - [`CONTRIBUTING.md`](../../CONTRIBUTING.md) - quality bar, project layout, how to contribute
-- [`docs/README.md`](../README.md) - index of contributor guides
+- [Contributor guides](../../CONTRIBUTING.md#contributor-guides) - index of contributor guides
