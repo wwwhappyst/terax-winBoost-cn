@@ -14,6 +14,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { type AppLanguage, useTranslation } from "@/modules/i18n";
 import { usePreferencesStore } from "@/modules/settings/preferences";
 import type { ThemePref } from "@/modules/settings/store";
 import {
@@ -21,6 +22,7 @@ import {
   setAutostart,
   setDefaultWorkspaceEnv,
   setExplorerGitDecorations,
+  setLanguage,
   setRestoreWindowState,
   setShowHidden,
   setTerminalCursorBlink,
@@ -74,7 +76,9 @@ const ZOOM_STEP = 0.05;
 
 export function GeneralSection() {
   const { mode, setMode } = useTheme();
+  const tr = useTranslation();
 
+  const language = usePreferencesStore((s) => s.language);
   const autostart = usePreferencesStore((s) => s.autostart);
   const restoreWindowState = usePreferencesStore((s) => s.restoreWindowState);
   const showHidden = usePreferencesStore((s) => s.showHidden);
@@ -139,6 +143,28 @@ export function GeneralSection() {
         title="General"
         description="Mode, terminal, and startup."
       />
+
+      <SettingRow
+        title={tr("Interface language")}
+        description={tr("Choose the language used by the Terax interface.")}
+      >
+        <Select
+          value={language}
+          onValueChange={(value) => void setLanguage(value as AppLanguage)}
+        >
+          <SelectTrigger
+            value={language}
+            size="sm"
+            className="h-8 w-36 text-[12px]"
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="en">English</SelectItem>
+            <SelectItem value="zh-CN">简体中文</SelectItem>
+          </SelectContent>
+        </Select>
+      </SettingRow>
 
       <div className="flex flex-col gap-2">
         <Label>Appearance</Label>

@@ -101,6 +101,13 @@ import { useTabCloseGuards } from "./hooks/useTabCloseGuards";
 import { useWorkspaceSwitcher } from "./hooks/useWorkspaceSwitcher";
 
 export default function App() {
+  const language = usePreferencesStore((state) => state.language);
+
+  useEffect(() => {
+    // 让辅助技术和浏览器能力随界面语言实时同步。
+    document.documentElement.lang = language;
+  }, [language]);
+
   const {
     tabs,
     activeId,

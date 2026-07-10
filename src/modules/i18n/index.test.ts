@@ -46,4 +46,20 @@ describe("translate", () => {
       module.translate("zh-CN", "Copied {count} files", { count: 2 }),
     ).toBe("已复制 2 个文件");
   });
+
+  it("translates the interface language setting", async () => {
+    const module = await loadI18n();
+    expect(module?.translate, "i18n module must export translate").toBeTypeOf(
+      "function",
+    );
+    if (!module?.translate) return;
+
+    expect(module.translate("zh-CN", "Interface language")).toBe("界面语言");
+    expect(
+      module.translate(
+        "zh-CN",
+        "Choose the language used by the Terax interface.",
+      ),
+    ).toBe("选择 Terax 界面使用的语言。");
+  });
 });

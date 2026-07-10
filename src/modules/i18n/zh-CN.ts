@@ -2,4 +2,7 @@
 export const ZH_CN: Record<string, string> = {
   "Open settings": "打开设置",
   "Copied {count} files": "已复制 {count} 个文件",
+  "Interface language": "界面语言",
+  "Choose the language used by the Terax interface.":
+    "选择 Terax 界面使用的语言。",
 };

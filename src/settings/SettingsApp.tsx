@@ -91,11 +91,17 @@ function readInitialTab(): SettingsTab {
 export function SettingsApp() {
   const [active, setActive] = useState<SettingsTab>(readInitialTab);
   const init = usePreferencesStore((s) => s.init);
+  const language = usePreferencesStore((s) => s.language);
   const ActiveSection = TABS.find((t) => t.id === active)?.component;
 
   useEffect(() => {
     void init();
   }, [init]);
+
+  useEffect(() => {
+    // 设置窗口独立运行，需要同步自己的根元素语言。
+    document.documentElement.lang = language;
+  }, [language]);
 
   useEffect(() => {
     const apply = (detail: string) => {
