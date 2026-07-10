@@ -1,4 +1,5 @@
 import { resolveFontFamily } from "@/lib/fonts";
+import { IS_MAC, IS_WINDOWS } from "@/lib/platform";
 import { usePreferencesStore } from "@/modules/settings/preferences";
 import { buildTerminalTheme } from "@/styles/terminalTheme";
 import { openUrl } from "@tauri-apps/plugin-opener";
@@ -14,6 +15,7 @@ import {
   writeTerminalClipboard,
 } from "./terminalClipboard";
 import {
+  terminalClipboardAction,
   terminalDeleteSequence,
   terminalLineNavigationSequence,
   terminalWordNavigationSequence,
@@ -278,15 +280,20 @@ function createSlot(): Slot {
       if (event.type === "keydown") bridge.writeToPty("\x1b\r");
       return false;
     }
-    if (isTerminalCopy(event)) {
-      if (event.type === "keydown" && slot.term.hasSelection()) {
+    const clipboardAction = terminalClipboardAction(event, {
+      isMac: IS_MAC,
+      isWindows: IS_WINDOWS,
+      hasSelection: slot.term.hasSelection(),
+    });
+    if (clipboardAction === "copy") {
+      if (event.type === "keydown") {
         const sel = slot.term.getSelection();
         if (sel) void writeTerminalClipboard(sel);
       }
       event.preventDefault();
       return false;
     }
-    if (isTerminalPaste(event)) {
+    if (clipboardAction === "paste") {
       if (event.type === "keydown") {
         const targetLeafId = slot.currentLeafId;
         void readTerminalClipboard().then((text) => {
@@ -1037,32 +1044,6 @@ export function getLiveSlotForLeaf(leafId: number): Slot | null {
     slots.find(
       (s) => s.currentLeafId === leafId || s.retainedLeafId === leafId,
     ) ?? null
-  );
-}
-
-const IS_MAC =
-  typeof navigator !== "undefined" &&
-  /Mac|iPhone|iPad/.test(navigator.userAgent);
-
-function isTerminalCopy(e: KeyboardEvent): boolean {
-  return (
-    !IS_MAC &&
-    e.ctrlKey &&
-    e.shiftKey &&
-    !e.altKey &&
-    !e.metaKey &&
-    (e.code === "KeyC" || e.key === "c" || e.key === "C")
-  );
-}
-
-function isTerminalPaste(e: KeyboardEvent): boolean {
-  return (
-    !IS_MAC &&
-    e.ctrlKey &&
-    e.shiftKey &&
-    !e.altKey &&
-    !e.metaKey &&
-    (e.code === "KeyV" || e.key === "v" || e.key === "V")
   );
 }
 

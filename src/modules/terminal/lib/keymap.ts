@@ -1,9 +1,29 @@
 export type TerminalKeyEvent = Pick<
   KeyboardEvent,
-  "altKey" | "ctrlKey" | "metaKey" | "key" | "code"
+  "altKey" | "ctrlKey" | "metaKey" | "shiftKey" | "key" | "code"
 >;
 
 export type PlatformOpts = { isMac: boolean };
+
+export type TerminalClipboardOptions = PlatformOpts & {
+  isWindows: boolean;
+  hasSelection: boolean;
+};
+
+/** 根据平台与终端选区决定是否接管剪贴板快捷键。 */
+export function terminalClipboardAction(
+  event: TerminalKeyEvent,
+  options: TerminalClipboardOptions,
+): "copy" | "paste" | null {
+  if (options.isMac || !event.ctrlKey || event.altKey || event.metaKey) return null;
+  const copy = event.code === "KeyC" || event.key.toLowerCase() === "c";
+  if (copy && (event.shiftKey || (options.isWindows && options.hasSelection))) {
+    return "copy";
+  }
+  const paste = event.code === "KeyV" || event.key.toLowerCase() === "v";
+  if (paste && (event.shiftKey || options.isWindows)) return "paste";
+  return null;
+}
 
 export function terminalWordNavigationSequence(event: TerminalKeyEvent): string | null {
   if (!event.altKey || event.ctrlKey || event.metaKey) return null;

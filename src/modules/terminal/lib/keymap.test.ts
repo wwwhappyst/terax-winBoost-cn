@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import * as keymap from "./keymap";
 import {
+  terminalClipboardAction,
   terminalDeleteSequence,
   terminalLineNavigationSequence,
   terminalWordNavigationSequence,
@@ -12,6 +13,7 @@ const evt = (partial: Partial<TerminalKeyEvent>): TerminalKeyEvent => ({
   altKey: false,
   ctrlKey: false,
   metaKey: false,
+  shiftKey: false,
   key: "",
   code: "",
   ...partial,
@@ -167,5 +169,39 @@ describe("terminalClipboardAction", () => {
         hasSelection: false,
       }),
     ).toBeNull();
+  });
+
+  it("pastes plain Ctrl+V only on Windows", () => {
+    const ctrlV = evt({ ctrlKey: true, key: "v", code: "KeyV" });
+    expect(
+      terminalClipboardAction(ctrlV, {
+        isMac: false,
+        isWindows: true,
+        hasSelection: false,
+      }),
+    ).toBe("paste");
+    expect(
+      terminalClipboardAction(ctrlV, {
+        isMac: false,
+        isWindows: false,
+        hasSelection: false,
+      }),
+    ).toBeNull();
+  });
+
+  it("keeps Ctrl+Shift+C and Ctrl+Shift+V off macOS", () => {
+    const options = { isMac: false, isWindows: false, hasSelection: false };
+    expect(
+      terminalClipboardAction(
+        evt({ ctrlKey: true, shiftKey: true, key: "c", code: "KeyC" }),
+        options,
+      ),
+    ).toBe("copy");
+    expect(
+      terminalClipboardAction(
+        evt({ ctrlKey: true, shiftKey: true, key: "v", code: "KeyV" }),
+        options,
+      ),
+    ).toBe("paste");
   });
 });
