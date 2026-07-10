@@ -48,8 +48,6 @@ function route(
     body: info?.title,
     focused: ctx.focused,
     visible: ctx.activeId === session.tabId,
-    // Stop fires every turn, so finished only updates the bell; attention toasts.
-    allowToast: kind === "attention",
     tabId: session.tabId,
     leafId: session.leafId,
     onActivate: () => ctx.onActivate(session.tabId, session.leafId),

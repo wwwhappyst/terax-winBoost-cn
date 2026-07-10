@@ -30,7 +30,6 @@ function route(overrides: { focused: boolean; visible: boolean }) {
     kind: "finished",
     title: "Codex finished",
     body: "workspace",
-    allowToast: false,
     tabId: 1,
     leafId: 2,
     onActivate: vi.fn(),
