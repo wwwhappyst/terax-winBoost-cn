@@ -351,6 +351,21 @@ mod tests {
     }
 
     #[test]
+    fn named_markers_self_arm_grok_and_opencode() {
+        // 两个新增 CLI 必须通过命名标记自启动，不能依赖 PowerShell preexec。
+        for agent in ["grok", "opencode"] {
+            let mut detector = AgentDetector::new();
+            assert_eq!(
+                run(
+                    &mut detector,
+                    &osc(&format!("777;notify;Terax;{agent};finished")),
+                ),
+                vec![started(agent), Transition::Finished],
+            );
+        }
+    }
+
+    #[test]
     fn four_field_marker_ignores_unknown_agent() {
         let mut d = AgentDetector::new();
         assert!(run(&mut d, &osc("777;notify;Terax;evil;attention")).is_empty());

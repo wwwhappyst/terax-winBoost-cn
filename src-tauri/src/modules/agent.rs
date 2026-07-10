@@ -401,4 +401,20 @@ mod tests {
             json!({ "permissions": {} })
         );
     }
+
+    #[test]
+    fn registers_grok_and_opencode_agents() {
+        // 通知安装入口必须认识两个新增 CLI，未知名称仍由 find 拒绝。
+        assert!(find("grok").is_ok());
+        assert!(find("opencode").is_ok());
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn windows_status_needle_includes_current_executable() {
+        // 状态检查必须识别开发版、安装版或目录变化产生的失效旧路径。
+        let needle = status_needle(spec("codex"), "finished");
+        let exe = std::env::current_exe().unwrap().display().to_string();
+        assert!(needle.contains(&exe));
+    }
 }

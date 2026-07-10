@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import * as keymap from "./keymap";
 import {
   terminalDeleteSequence,
   terminalLineNavigationSequence,
@@ -132,6 +133,39 @@ describe("terminalDeleteSequence", () => {
         evt({ key: "Backspace", code: "Backspace" }),
         { isMac: true },
       ),
+    ).toBeNull();
+  });
+});
+
+describe("terminalClipboardAction", () => {
+  it("copies Ctrl+C only when Windows has a terminal selection", () => {
+    // 先约束期望接口，使 RED 来自缺少目标行为而不是测试加载错误。
+    type ClipboardAction = (
+      event: TerminalKeyEvent,
+      options: { isMac: boolean; isWindows: boolean; hasSelection: boolean },
+    ) => "copy" | "paste" | null;
+    const action = (
+      keymap as unknown as { terminalClipboardAction?: ClipboardAction }
+    ).terminalClipboardAction;
+    expect(action, "keymap must export terminalClipboardAction").toBeTypeOf(
+      "function",
+    );
+    if (!action) return;
+
+    const ctrlC = evt({ ctrlKey: true, key: "c", code: "KeyC" });
+    expect(
+      action(ctrlC, {
+        isMac: false,
+        isWindows: true,
+        hasSelection: true,
+      }),
+    ).toBe("copy");
+    expect(
+      action(ctrlC, {
+        isMac: false,
+        isWindows: true,
+        hasSelection: false,
+      }),
     ).toBeNull();
   });
 });

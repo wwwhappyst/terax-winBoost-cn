@@ -1,4 +1,4 @@
-# Windows Terminal Shortcuts Implementation Plan
+# Windows 终端快捷键实施计划
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -31,22 +31,33 @@
 
 - [ ] **Step 1: 写入 Windows 复制与中断的失败测试**
 
-在 `keymap.test.ts` 的导入中加入 `terminalClipboardAction`，并添加：
+在 `keymap.test.ts` 中加入 `import * as keymap from "./keymap"`，再添加以下测试。使用命名空间读取尚不存在的接口，保证 RED 是明确的断言失败，而不是模块加载错误：
 
 ```ts
 describe("terminalClipboardAction", () => {
   it("copies Ctrl+C only when Windows has a terminal selection", () => {
+    type ClipboardAction = (
+      event: TerminalKeyEvent,
+      options: { isMac: boolean; isWindows: boolean; hasSelection: boolean },
+    ) => "copy" | "paste" | null;
+    const action = (
+      keymap as unknown as { terminalClipboardAction?: ClipboardAction }
+    ).terminalClipboardAction;
+    expect(action, "keymap must export terminalClipboardAction").toBeTypeOf(
+      "function",
+    );
+    if (!action) return;
     const ctrlC = evt({ ctrlKey: true, key: "c", code: "KeyC" });
 
     expect(
-      terminalClipboardAction(ctrlC, {
+      action(ctrlC, {
         isMac: false,
         isWindows: true,
         hasSelection: true,
       }),
     ).toBe("copy");
     expect(
-      terminalClipboardAction(ctrlC, {
+      action(ctrlC, {
         isMac: false,
         isWindows: true,
         hasSelection: false,
@@ -64,7 +75,7 @@ Run:
 pnpm test src/modules/terminal/lib/keymap.test.ts
 ```
 
-Expected: FAIL，因为 `keymap.ts` 尚未导出 `terminalClipboardAction`。
+Expected: FAIL，断言提示 `keymap must export terminalClipboardAction`。
 
 - [ ] **Step 3: 添加最小复制判定**
 

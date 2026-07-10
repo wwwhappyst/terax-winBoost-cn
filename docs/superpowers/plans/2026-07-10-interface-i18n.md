@@ -1,4 +1,4 @@
-# Interface i18n Implementation Plan
+# 界面国际化实施计划
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -37,20 +37,47 @@
 ```ts
 // 验证轻量翻译层的英文回退、中文查询和动态参数替换。
 import { describe, expect, it } from "vitest";
-import { translate } from "./index";
+
+type I18nModule = {
+  translate?: (
+    language: "en" | "zh-CN",
+    text: string,
+    params?: Record<string, string | number>,
+  ) => string;
+};
+
+async function loadI18n(): Promise<I18nModule | null> {
+  const modulePath = "./index.ts";
+  try {
+    return (await import(/* @vite-ignore */ modulePath)) as I18nModule;
+  } catch {
+    return null;
+  }
+}
 
 describe("translate", () => {
-  it("returns Chinese for a known key and English for a missing key", () => {
-    expect(translate("zh-CN", "Open settings")).toBe("打开设置");
-    expect(translate("zh-CN", "Untranslated upstream text")).toBe(
+  it("returns Chinese for a known key and English for a missing key", async () => {
+    const module = await loadI18n();
+    expect(module, "i18n module must exist").not.toBeNull();
+    expect(module?.translate, "i18n module must export translate").toBeTypeOf(
+      "function",
+    );
+    if (!module?.translate) return;
+    expect(module.translate("zh-CN", "Open settings")).toBe("打开设置");
+    expect(module.translate("zh-CN", "Untranslated upstream text")).toBe(
       "Untranslated upstream text",
     );
-    expect(translate("en", "Open settings")).toBe("Open settings");
+    expect(module.translate("en", "Open settings")).toBe("Open settings");
   });
 
-  it("replaces string and numeric placeholders", () => {
+  it("replaces string and numeric placeholders", async () => {
+    const module = await loadI18n();
+    expect(module?.translate, "i18n module must export translate").toBeTypeOf(
+      "function",
+    );
+    if (!module?.translate) return;
     expect(
-      translate("zh-CN", "Copied {count} files", { count: 2 }),
+      module.translate("zh-CN", "Copied {count} files", { count: 2 }),
     ).toBe("已复制 2 个文件");
   });
 });
@@ -60,7 +87,7 @@ describe("translate", () => {
 
 Run: `pnpm test src/modules/i18n/index.test.ts`
 
-Expected: FAIL，因为 `src/modules/i18n/index.ts` 尚不存在。
+Expected: FAIL，断言提示 `i18n module must exist`，不是无法解析静态导入。
 
 - [ ] **Step 3: 添加最小中文词典**
 
