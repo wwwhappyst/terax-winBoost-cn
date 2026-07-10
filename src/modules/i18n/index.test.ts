@@ -62,4 +62,18 @@ describe("translate", () => {
       ),
     ).toBe("选择 Terax 界面使用的语言。");
   });
+
+  it("translates agent hook errors with a product name", async () => {
+    const module = await loadI18n();
+    expect(module?.translate, "i18n module must export translate").toBeTypeOf(
+      "function",
+    );
+    if (!module?.translate) return;
+
+    expect(
+      module.translate("zh-CN", "Failed to enable {agent} hooks", {
+        agent: "OpenCode",
+      }),
+    ).toBe("启用 OpenCode Hook 失败");
+  });
 });

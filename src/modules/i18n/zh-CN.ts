@@ -5,4 +5,5 @@ export const ZH_CN: Record<string, string> = {
   "Interface language": "界面语言",
   "Choose the language used by the Terax interface.":
     "选择 Terax 界面使用的语言。",
+  "Failed to enable {agent} hooks": "启用 {agent} Hook 失败",
 };

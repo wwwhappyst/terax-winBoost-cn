@@ -5,6 +5,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { t } from "@/modules/i18n";
 import {
   CheckmarkCircle02Icon,
   Loading03Icon,
@@ -14,6 +15,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import { invoke } from "@tauri-apps/api/core";
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import { AgentIcon } from "../lib/agentIcon";
 import { displayAgent } from "../lib/format";
 import type { AgentNotification, AgentStatus } from "../lib/types";
@@ -77,7 +79,7 @@ const NOTIF_LABEL: Record<AgentNotification["kind"], string> = {
   error: "failed",
 };
 
-const HOOK_AGENTS = ["claude", "codex", "gemini"] as const;
+const HOOK_AGENTS = ["claude", "codex", "gemini", "grok", "opencode"] as const;
 
 function HookAgentRow({
   id,
@@ -213,8 +215,11 @@ export function NotificationBell({ onActivate, onActivateLocal }: Props) {
     try {
       await invoke("agent_enable_hooks", { agent: id });
       setHooks((h) => ({ ...h, [id]: true }));
-    } catch {
+    } catch (error) {
       setHooks((h) => ({ ...h, [id]: false }));
+      toast.error(t("Failed to enable {agent} hooks", { agent: displayAgent(id) }), {
+        description: String(error),
+      });
     } finally {
       setInstalling(null);
     }
