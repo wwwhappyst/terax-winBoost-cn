@@ -12,6 +12,8 @@ export function translate(
 ): string {
   const template = language === "zh-CN" ? (ZH_CN[text] ?? text) : text;
   return template.replace(/\{(\w+)\}/g, (match, key: string) =>
-    Object.hasOwn(params, key) ? String(params[key]) : match,
+    Object.prototype.hasOwnProperty.call(params, key)
+      ? String(params[key])
+      : match,
   );
 }

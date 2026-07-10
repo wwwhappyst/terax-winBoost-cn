@@ -14,6 +14,7 @@ import {
   type SttProvider,
   WHISPERCPP_DEFAULT_BASE_URL,
 } from "@/modules/ai/config";
+import type { AppLanguage } from "@/modules/i18n";
 import type { KeyBinding, ShortcutId } from "@/modules/shortcuts/shortcuts";
 import { emit, listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { LazyStore } from "@tauri-apps/plugin-store";
@@ -112,6 +113,7 @@ export const EDITOR_THEME_LABELS: Record<EditorThemeId, string> = {
 };
 
 export type Preferences = {
+  language: AppLanguage;
   theme: ThemePref;
   themeId: string;
   backgroundKind: BackgroundKind;
@@ -197,6 +199,7 @@ export type LspCustomServer = {
 };
 
 const STORE_PATH = "terax-settings.json";
+const KEY_LANGUAGE = "language";
 const KEY_THEME = "theme";
 const KEY_THEME_ID = "themeId";
 const KEY_BG_KIND = "backgroundKind";
@@ -273,6 +276,7 @@ export const TERMINAL_SCROLLBACK_PRESETS = [
 ] as const;
 
 export const DEFAULT_PREFERENCES: Preferences = {
+  language: "en",
   theme: "system",
   themeId: DEFAULT_THEME_ID,
   backgroundKind: "none",
@@ -352,6 +356,7 @@ export async function loadPreferences(): Promise<Preferences> {
   const map = new Map<string, unknown>(entries);
   const get = <T>(k: string): T | undefined => map.get(k) as T | undefined;
   return {
+    language: coerceAppLanguage(get(KEY_LANGUAGE)),
     theme: get<ThemePref>(KEY_THEME) ?? DEFAULT_PREFERENCES.theme,
     themeId: get<string>(KEY_THEME_ID) ?? DEFAULT_PREFERENCES.themeId,
     backgroundKind:
@@ -537,6 +542,16 @@ export async function setLspCustomServers(
 
 export async function setTheme(value: ThemePref): Promise<void> {
   await writePref(KEY_THEME, value);
+}
+
+/** 将持久化值限制为当前支持的界面语言。 */
+export function coerceAppLanguage(value: unknown): AppLanguage {
+  return value === "zh-CN" ? "zh-CN" : "en";
+}
+
+/** 持久化界面语言，并通知其他窗口同步。 */
+export async function setLanguage(value: AppLanguage): Promise<void> {
+  await writePref(KEY_LANGUAGE, value);
 }
 
 export async function setThemeId(value: string): Promise<void> {
@@ -832,6 +847,7 @@ export async function onPreferencesChange(
   cb: (key: PrefKey, value: unknown) => void,
 ): Promise<UnlistenFn> {
   const map: Record<string, PrefKey> = {
+    [KEY_LANGUAGE]: "language",
     [KEY_THEME]: "theme",
     [KEY_THEME_ID]: "themeId",
     [KEY_BG_KIND]: "backgroundKind",
