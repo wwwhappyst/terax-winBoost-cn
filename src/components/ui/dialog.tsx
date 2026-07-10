@@ -2,6 +2,7 @@ import * as React from "react"
 import { Dialog as DialogPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
+import { t, translateNode } from "@/modules/i18n"
 import { Button } from "@/components/ui/button"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { Cancel01Icon } from "@hugeicons/core-free-icons"
@@ -74,7 +75,7 @@ function DialogContent({
               size="icon-sm"
             >
               <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} />
-              <span className="sr-only">Close</span>
+              <span className="sr-only">{t("Close")}</span>
             </Button>
           </DialogPrimitive.Close>
         )}
@@ -122,6 +123,7 @@ function DialogFooter({
 
 function DialogTitle({
   className,
+  children,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Title>) {
   return (
@@ -132,12 +134,15 @@ function DialogTitle({
         className
       )}
       {...props}
-    />
+    >
+      {translateNode(children)}
+    </DialogPrimitive.Title>
   )
 }
 
 function DialogDescription({
   className,
+  children,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Description>) {
   return (
@@ -148,7 +153,9 @@ function DialogDescription({
         className
       )}
       {...props}
-    />
+    >
+      {translateNode(children)}
+    </DialogPrimitive.Description>
   )
 }
 

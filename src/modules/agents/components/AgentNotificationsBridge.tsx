@@ -1,4 +1,5 @@
 import type { Tab } from "@/modules/tabs";
+import { t } from "@/modules/i18n";
 import { hasLeaf, leafIdForPty } from "@/modules/terminal";
 import { listen } from "@tauri-apps/api/event";
 import { useEffect, useRef } from "react";
@@ -38,7 +39,9 @@ function route(
   const info = tabInfo(ctx.tabs, session.leafId);
   const name = displayAgent(session.agent);
   const heading =
-    kind === "attention" ? `${name} needs your input` : `${name} finished`;
+    kind === "attention"
+      ? t("{agent} needs your input", { agent: name })
+      : t("{agent} finished", { agent: name });
 
   routeAgentNotification({
     source: "terminal",

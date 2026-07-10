@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
+import { t as tr } from "@/modules/i18n";
 import { usePreferencesStore } from "@/modules/settings/preferences";
 import { setShortcuts } from "@/modules/settings/store";
 import {
@@ -115,7 +116,7 @@ export function ShortcutsSection() {
           return (
             <div key={group} className="flex flex-col gap-3">
               <h3 className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
-                {group}
+                {tr(group)}
               </h3>
               <div className="flex flex-col divide-y divide-border/40 rounded-lg border border-border/60 bg-card/40 overflow-hidden">
                 {items.map((s) => (
@@ -142,8 +143,9 @@ export function ShortcutsSection() {
           <AlertDialogHeader>
             <AlertDialogTitle>Reset all shortcuts?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will revert all your custom keyboard shortcuts to their
-              factory defaults. This action cannot be undone.
+              {tr(
+                "This will revert all your custom keyboard shortcuts to their factory defaults. This action cannot be undone.",
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -188,7 +190,7 @@ function ShortcutRow({
   return (
     <div className="group flex items-center justify-between px-3 py-2.5 transition-colors hover:bg-muted/30">
       <div className="flex flex-col gap-0.5">
-        <span className="text-[12.5px] font-medium">{shortcut.label}</span>
+        <span className="text-[12.5px] font-medium">{tr(shortcut.label)}</span>
       </div>
 
       <div className="flex items-center gap-2">
@@ -321,8 +323,8 @@ function Recorder({
 
   return (
     <div className="flex items-center gap-2 rounded bg-accent/50 px-2 py-1 text-[11px] ring-1 ring-accent">
-      <span className="animate-pulse font-medium">Recording...</span>
-      <span className="text-muted-foreground">(Esc to cancel)</span>
+      <span className="animate-pulse font-medium">{tr("Recording...")}</span>
+      <span className="text-muted-foreground">{tr("(Esc to cancel)")}</span>
     </div>
   );
 }

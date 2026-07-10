@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
+import { t as tr } from "@/modules/i18n";
 import { useChat, type UIMessage } from "@ai-sdk/react";
 import {
   Add01Icon,
@@ -220,7 +221,9 @@ function PlanModeStrip() {
   return (
     <div className="flex shrink-0 items-center gap-2 border-b border-border/40 bg-muted/40 px-3 py-1.5">
       <span className="size-1.5 shrink-0 rounded-full bg-amber-500" />
-      <span className="text-[11px] font-medium text-foreground">Plan mode</span>
+      <span className="text-[11px] font-medium text-foreground">
+        {tr("Plan mode")}
+      </span>
       <span className="text-[11px] text-muted-foreground">
         {queueLen > 0 ? `· ${queueLen} queued` : "· no edits queued"}
       </span>
@@ -230,7 +233,7 @@ function PlanModeStrip() {
         onClick={() => disable()}
         className="rounded px-1.5 py-0.5 text-[10.5px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
       >
-        Exit
+        {tr("Exit")}
       </button>
     </div>
   );
@@ -255,7 +258,7 @@ function EmptyShell({
         onHeaderPointerDown={onHeaderPointerDown}
       />
       <div className="flex flex-1 items-center justify-center text-[11px] text-muted-foreground">
-        Loading sessions…
+        {tr("Loading sessions…")}
       </div>
     </>
   );
@@ -303,8 +306,8 @@ function Header({
           variant="ghost"
           onClick={onClose}
           className="size-5"
-          aria-label="Close"
-          title="Close (Esc)"
+          aria-label={tr("Close")}
+          title={tr("Close (Esc)")}
         >
           <HugeiconsIcon icon={Cancel01Icon} size={11} strokeWidth={1.75} />
         </Button>
@@ -369,7 +372,7 @@ function ContextIndicator({ messages }: { messages: UIMessage[] }) {
         <ContextContentHeader />
         <ContextContentBody>
           <div className="flex items-center justify-between text-muted-foreground">
-            <span>Model</span>
+            <span>{tr("Model")}</span>
             <span className="font-mono text-foreground">{modelLabel}</span>
           </div>
           <div className="mt-1 flex items-center justify-between text-muted-foreground">
@@ -380,7 +383,7 @@ function ContextIndicator({ messages }: { messages: UIMessage[] }) {
           </div>
           {lastCached > 0 && (
             <div className="flex items-center justify-between text-muted-foreground">
-              <span>Of which cached</span>
+              <span>{tr("Of which cached")}</span>
               <span className="font-mono text-foreground">
                 {formatTokens(lastCached)}
               </span>
@@ -389,26 +392,26 @@ function ContextIndicator({ messages }: { messages: UIMessage[] }) {
           {reported > 0 && (
             <>
               <div className="mt-1.5 flex items-center justify-between text-muted-foreground">
-                <span>Session input</span>
+                <span>{tr("Session input")}</span>
                 <span className="font-mono text-foreground">
                   {formatTokens(tokens.inputTokens)}
                 </span>
               </div>
               <div className="flex items-center justify-between text-muted-foreground">
-                <span>Session output</span>
+                <span>{tr("Session output")}</span>
                 <span className="font-mono text-foreground">
                   {formatTokens(tokens.outputTokens)}
                 </span>
               </div>
               {tokens.cachedInputTokens > 0 && (
                 <div className="flex items-center justify-between text-muted-foreground">
-                  <span>Cache hit</span>
+                  <span>{tr("Cache hit")}</span>
                   <span className="font-mono text-foreground">{cacheRate}%</span>
                 </div>
               )}
               {cost != null && (
                 <div className="flex items-center justify-between text-muted-foreground">
-                  <span>Session cost</span>
+                  <span>{tr("Session cost")}</span>
                   <span className="font-mono text-foreground">
                     ${cost.toFixed(cost < 0.01 ? 4 : cost < 1 ? 3 : 2)}
                   </span>
@@ -417,7 +420,7 @@ function ContextIndicator({ messages }: { messages: UIMessage[] }) {
             </>
           )}
           <div className="flex items-center justify-between text-muted-foreground">
-            <span>Window</span>
+            <span>{tr("Window")}</span>
             <span className="font-mono text-foreground">
               {formatTokens(max)}
             </span>
@@ -474,7 +477,7 @@ function SessionPicker() {
           className="gap-2 text-xs"
         >
           <HugeiconsIcon icon={Add01Icon} size={12} strokeWidth={1.75} />
-          New session
+          {tr("New session")}
         </DropdownMenuItem>
         {sorted.length > 0 ? <DropdownMenuSeparator /> : null}
         {sorted.map((s) => (

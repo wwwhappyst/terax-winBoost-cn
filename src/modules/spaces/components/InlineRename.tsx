@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { t as tr } from "@/modules/i18n";
 import { useEffect, useRef } from "react";
 
 type Props = {
@@ -35,7 +36,7 @@ export function InlineRename({
     <input
       ref={ref}
       defaultValue={initial}
-      aria-label="Rename space"
+      aria-label={tr("Rename space")}
       className={cn(
         "w-full min-w-0 rounded-sm bg-background px-1.5 py-0.5 text-xs text-foreground outline-none ring-1 ring-border focus:ring-ring",
         className,

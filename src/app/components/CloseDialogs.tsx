@@ -9,6 +9,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import type { AppCloseBlocker } from "@/app/hooks/useAppCloseGuard";
+import { t } from "@/modules/i18n";
 import type { Tab } from "@/modules/tabs";
 
 type Props = {
@@ -30,15 +31,20 @@ type Props = {
 function appCloseMessage(blocker: AppCloseBlocker): string {
   const dirty =
     blocker.dirtyEditors === 1
-      ? "1 file has unsaved changes"
-      : `${blocker.dirtyEditors} files have unsaved changes`;
+      ? t("1 file has unsaved changes")
+      : t("{count} files have unsaved changes", {
+          count: blocker.dirtyEditors,
+        });
   if (blocker.dirtyEditors > 0 && blocker.busyTerminal) {
-    return `A process is still running and ${dirty}. Quitting will terminate it and discard the changes.`;
+    return t(
+      "A process is still running and {dirty}. Quitting will terminate it and discard the changes.",
+      { dirty },
+    );
   }
   if (blocker.dirtyEditors > 0) {
-    return `${dirty.charAt(0).toUpperCase()}${dirty.slice(1)}. Quitting will discard them.`;
+    return t("{dirty}. Quitting will discard them.", { dirty });
   }
-  return "A process is still running in a terminal. Quitting will terminate it.";
+  return t("A process is still running in a terminal. Quitting will terminate it.");
 }
 
 /** Confirmation dialogs for closing dirty editors and terminals with live processes. */
@@ -68,10 +74,10 @@ export function CloseDialogs({
             <AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
             <AlertDialogDescription>
               {tabs.find((t) => t.id === pendingCloseTab)?.title
-                ? `"${
-                    tabs.find((t) => t.id === pendingCloseTab)?.title
-                  }" has unsaved changes. Close anyway?`
-                : "This file has unsaved changes. Close anyway?"}
+                ? t('"{title}" has unsaved changes. Close anyway?', {
+                    title: tabs.find((tab) => tab.id === pendingCloseTab)?.title ?? "",
+                  })
+                : t("This file has unsaved changes. Close anyway?")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -93,7 +99,7 @@ export function CloseDialogs({
           <AlertDialogHeader>
             <AlertDialogTitle>Close Terminal?</AlertDialogTitle>
             <AlertDialogDescription>
-              A process is running. Closing this tab will terminate it.
+              {t("A process is running. Closing this tab will terminate it.")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -121,10 +127,18 @@ export function CloseDialogs({
                       (t) => t.id === pendingDeleteTabs[0],
                     )?.title;
                     return title
-                      ? `"${title}" has unsaved changes. The file has been deleted. Close anyway?`
-                      : "This file has unsaved changes. The file has been deleted. Close anyway?";
+                      ? t(
+                          '"{title}" has unsaved changes. The file has been deleted. Close anyway?',
+                          { title },
+                        )
+                      : t(
+                          "This file has unsaved changes. The file has been deleted. Close anyway?",
+                        );
                   })()
-                : `${pendingDeleteTabs?.length ?? 0} files have unsaved changes. They have been deleted. Close all anyway?`}
+                : t(
+                    "{count} files have unsaved changes. They have been deleted. Close all anyway?",
+                    { count: pendingDeleteTabs?.length ?? 0 },
+                  )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

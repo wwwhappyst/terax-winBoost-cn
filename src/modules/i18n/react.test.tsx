@@ -32,4 +32,44 @@ describe("translation state bindings", () => {
     const Probe = () => <span>{useTranslation()("Open settings")}</span>;
     expect(renderToStaticMarkup(<Probe />)).toContain("Open settings");
   });
+
+  it("translates string children and preserves React elements", () => {
+    const translateNode = (
+      i18n as unknown as {
+        translateNode?: (value: React.ReactNode) => React.ReactNode;
+      }
+    ).translateNode;
+    expect(translateNode, "i18n must export translateNode").toBeTypeOf(
+      "function",
+    );
+    if (!translateNode) return;
+
+    usePreferencesStore.setState({ language: "zh-CN" });
+    expect(translateNode("Open settings")).toBe("打开设置");
+    const icon = <span aria-hidden="true" />;
+    expect(translateNode(icon)).toBe(icon);
+  });
+
+  it("translates text nested below an icon or wrapper", () => {
+    const translateNode = (
+      i18n as unknown as {
+        translateNode?: (value: React.ReactNode) => React.ReactNode;
+      }
+    ).translateNode;
+    expect(translateNode, "i18n must export translateNode").toBeTypeOf(
+      "function",
+    );
+    if (!translateNode) return;
+
+    usePreferencesStore.setState({ language: "zh-CN" });
+    const node = (
+      <span>
+        <i aria-hidden="true" />
+        <strong>Open settings</strong>
+      </span>
+    );
+    expect(renderToStaticMarkup(<>{translateNode(node)}</>)).toContain(
+      "打开设置",
+    );
+  });
 });

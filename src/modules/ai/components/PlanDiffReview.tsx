@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { t as tr } from "@/modules/i18n";
 import {
   ArrowDown01Icon,
   Cancel01Icon,
@@ -59,10 +60,10 @@ export function PlanDiffReview() {
       <div className="flex items-center justify-between border-b border-border/40 px-3 py-2">
         <div className="flex flex-col">
           <span className="text-[13px] font-semibold tracking-tight">
-            Plan review
+            {tr("Plan review")}
           </span>
           <span className="text-[10.5px] text-muted-foreground">
-            {queue.length} pending change{queue.length === 1 ? "" : "s"}
+            {tr("{count} pending changes", { count: queue.length })}
           </span>
         </div>
         <div className="flex items-center gap-1.5">
@@ -75,7 +76,7 @@ export function PlanDiffReview() {
             disabled={busy}
           >
             <HugeiconsIcon icon={Cancel01Icon} size={12} strokeWidth={2} />
-            Discard all
+            {tr("Discard all")}
           </Button>
           <Button
             type="button"
@@ -215,7 +216,7 @@ function UnifiedDiffPreview({
   if (lines.length === 0) {
     return (
       <div className="text-[11px] italic text-muted-foreground">
-        no line-level changes
+        {tr("no line-level changes")}
       </div>
     );
   }
@@ -247,7 +248,7 @@ function UnifiedDiffPreview({
         ))}
         {rest > 0 ? (
           <div className="px-2 py-1 text-[10px] italic text-muted-foreground">
-            … {rest} more changes
+            {tr("… {count} more changes", { count: rest })}
           </div>
         ) : null}
       </div>

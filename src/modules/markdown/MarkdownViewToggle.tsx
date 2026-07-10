@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { t as tr } from "@/modules/i18n";
 
 type Mode = "rendered" | "raw";
 
@@ -30,7 +31,7 @@ export function MarkdownViewToggle({
           renderedDisabled && "cursor-not-allowed opacity-40 hover:text-muted-foreground",
         )}
       >
-        Rendered
+        {tr("Rendered")}
       </button>
       <button
         type="button"
@@ -42,7 +43,7 @@ export function MarkdownViewToggle({
             : "text-muted-foreground hover:text-foreground",
         )}
       >
-        Raw
+        {tr("Raw")}
       </button>
     </div>
   );

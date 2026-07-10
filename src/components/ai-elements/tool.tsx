@@ -6,6 +6,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
+import { t as tr } from "@/modules/i18n";
 import {
   ArrowRight01Icon,
   CheckListIcon,
@@ -250,7 +251,9 @@ function ToolInput({ toolName, input }: { toolName: string; input: unknown }) {
   }
   return (
     <div className="space-y-1">
-      <div className="text-[10px] font-medium text-muted-foreground">Input</div>
+      <div className="text-[10px] font-medium text-muted-foreground">
+        {tr("Input")}
+      </div>
       <CodeBlockMini
         code={
           typeof input === "string" ? input : JSON.stringify(input, null, 2)
@@ -325,7 +328,9 @@ function ToolOutput({
   if (errorText) {
     return (
       <div className="space-y-1">
-        <div className="text-[10px] font-medium text-destructive">Error</div>
+        <div className="text-[10px] font-medium text-destructive">
+          {tr("Error")}
+        </div>
         <div className="rounded bg-destructive/10 px-2 py-1.5 font-mono text-[11px] text-destructive whitespace-pre-wrap">
           {errorText}
         </div>
@@ -351,7 +356,7 @@ function ToolOutput({
   return (
     <div className="space-y-1">
       <div className="text-[10px] font-medium text-muted-foreground">
-        Output
+        {tr("Output")}
       </div>
       {body}
     </div>
@@ -370,7 +375,7 @@ function renderToolOutput(toolName: string, output: unknown): ReactNode | null {
     return (
       <div className="flex items-center gap-1.5 font-mono text-[11px]">
         <span className="text-emerald-600 dark:text-emerald-400">✓</span>
-        <span className="text-foreground">read</span>
+        <span className="text-foreground">{tr("read")}</span>
         {path ? <span className="text-muted-foreground">· {path}</span> : null}
         {lines != null ? (
           <span className="text-muted-foreground">
@@ -388,7 +393,9 @@ function renderToolOutput(toolName: string, output: unknown): ReactNode | null {
       : [];
     if (entries.length === 0) {
       return (
-        <div className="text-[11px] italic text-muted-foreground">empty</div>
+        <div className="text-[11px] italic text-muted-foreground">
+          {tr("empty")}
+        </div>
       );
     }
     const dirs = entries.filter(
@@ -460,8 +467,10 @@ function renderToolOutput(toolName: string, output: unknown): ReactNode | null {
     if (hits.length === 0) {
       return (
         <div className="text-[11px] italic text-muted-foreground">
-          no matches
-          {filesScanned != null ? ` · ${filesScanned} files scanned` : ""}
+          {tr("no matches")}
+          {filesScanned != null
+            ? tr(" · {count} files scanned", { count: filesScanned })
+            : ""}
         </div>
       );
     }
@@ -485,12 +494,14 @@ function renderToolOutput(toolName: string, output: unknown): ReactNode | null {
         </div>
         <div className="flex items-center justify-between text-[10px] text-muted-foreground">
           <span>
-            {hits.length} hit{hits.length === 1 ? "" : "s"}
-            {filesScanned != null ? ` · ${filesScanned} files` : ""}
+            {tr("{count} hits", { count: hits.length })}
+            {filesScanned != null
+              ? tr(" · {count} files", { count: filesScanned })
+              : ""}
           </span>
           {truncated ? (
             <span className="rounded bg-amber-500/15 px-1.5 py-0.5 text-amber-700 dark:text-amber-400">
-              truncated
+              {tr("truncated")}
             </span>
           ) : null}
         </div>
@@ -507,7 +518,7 @@ function renderToolOutput(toolName: string, output: unknown): ReactNode | null {
     if (matches.length === 0) {
       return (
         <div className="text-[11px] italic text-muted-foreground">
-          no matches
+          {tr("no matches")}
         </div>
       );
     }
@@ -532,7 +543,7 @@ function renderToolOutput(toolName: string, output: unknown): ReactNode | null {
           <span className="text-emerald-600 dark:text-emerald-400">✓</span>
           {reps != null ? (
             <span className="text-foreground">
-              {reps} replacement{reps === 1 ? "" : "s"}
+              {tr("{count} replacements", { count: reps })}
             </span>
           ) : null}
           {path ? (
@@ -568,7 +579,7 @@ function renderToolOutput(toolName: string, output: unknown): ReactNode | null {
         <div className="flex items-center gap-1.5">
           <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
           {handle ? <span className="text-foreground">{handle}</span> : null}
-          <span className="text-muted-foreground">running</span>
+          <span className="text-muted-foreground">{tr("running")}</span>
         </div>
         {cmd ? (
           <div className="truncate text-muted-foreground">{cmd}</div>
@@ -635,17 +646,17 @@ function BashRunOutput({ data }: { data: Record<string, unknown> }) {
                 : "bg-destructive/15 text-destructive",
             )}
           >
-            exit {exit}
+            {tr("exit {code}", { code: exit })}
           </span>
         ) : null}
         {timedOut ? (
           <span className="rounded bg-amber-500/15 px-1.5 py-0.5 font-mono text-[10px] text-amber-700 dark:text-amber-400">
-            timed out
+            {tr("timed out")}
           </span>
         ) : null}
         {truncated ? (
           <span className="rounded bg-amber-500/15 px-1.5 py-0.5 font-mono text-[10px] text-amber-700 dark:text-amber-400">
-            truncated
+            {tr("truncated")}
           </span>
         ) : null}
       </div>
@@ -654,7 +665,7 @@ function BashRunOutput({ data }: { data: Record<string, unknown> }) {
       </pre>
       {cwdAfter ? (
         <div className="font-mono text-[10px] text-muted-foreground">
-          cwd → {cwdAfter}
+          {tr("cwd →")} {cwdAfter}
         </div>
       ) : null}
     </div>
@@ -735,7 +746,7 @@ function SuggestCommandCard({
             "disabled:opacity-60 disabled:cursor-default disabled:hover:bg-transparent",
             "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
           )}
-          aria-label="Insert into active terminal"
+          aria-label={tr("Insert into active terminal")}
         >
           <HugeiconsIcon
             icon={inserted ? TerminalIcon : ArrowRight01Icon}

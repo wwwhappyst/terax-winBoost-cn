@@ -5,6 +5,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { t as tr } from "@/modules/i18n";
 import { useShortcutLabel } from "@/modules/shortcuts";
 import { labelFor, type Tab, TabIcon } from "@/modules/tabs";
 import {
@@ -256,7 +257,9 @@ export function SpaceSwitcher({
       </PopoverTrigger>
       <PopoverContent align="start" sideOffset={6} className="w-[20rem] p-1.5">
         <div className="flex items-center justify-between px-1.5 pb-1.5 pt-0.5">
-          <span className="text-xs font-semibold text-foreground">Spaces</span>
+          <span className="text-xs font-semibold text-foreground">
+            {tr("Spaces")}
+          </span>
           {shortcut && (
             <Kbd className="h-5 bg-muted/70 text-[10px]">{shortcut}</Kbd>
           )}
@@ -305,7 +308,7 @@ export function SpaceSwitcher({
             className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground"
           >
             <HugeiconsIcon icon={PlusSignIcon} size={14} strokeWidth={1.75} />
-            <span className="flex-1">New space</span>
+            <span className="flex-1">{tr("New space")}</span>
           </button>
         </div>
       </PopoverContent>
@@ -569,7 +572,7 @@ function TabRow({
             e.stopPropagation();
             onClose();
           }}
-          aria-label="Close tab"
+          aria-label={tr("Close tab")}
           className="flex size-4 shrink-0 items-center justify-center rounded text-muted-foreground opacity-0 transition-opacity hover:bg-accent hover:text-foreground group-hover/tab:opacity-70 hover:opacity-100"
         >
           <HugeiconsIcon icon={Cancel01Icon} size={11} strokeWidth={2} />

@@ -2,6 +2,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWebview } from "@tauri-apps/api/webview";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { t } from "@/modules/i18n";
 import { currentWorkspaceEnv } from "@/modules/workspace";
 
 type Options = {
@@ -75,7 +76,9 @@ export function useExplorerFileDrop({ rootPath, isDir, onCopied }: Options) {
             workspace: currentWorkspaceEnv(),
           })
             .then(() => onCopied(dir))
-            .catch((err) => toast.error(`Copy failed: ${String(err)}`));
+            .catch((err) =>
+              toast.error(t("Copy failed"), { description: String(err) }),
+            );
         }
       })
       .then((fn) => {

@@ -9,6 +9,7 @@ import { Kbd } from "@/components/ui/kbd";
 import { Spinner } from "@/components/ui/spinner";
 import { fmtShortcut, MOD_KEY } from "@/lib/platform";
 import { cn } from "@/lib/utils";
+import { t as tr } from "@/modules/i18n";
 import { openSettingsWindow } from "@/modules/settings/openSettingsWindow";
 import {
   Add01Icon,
@@ -545,10 +546,10 @@ function ProviderConfigureCTA({ providerId }: { providerId: ProviderId }) {
     >
       <HugeiconsIcon icon={Settings01Icon} size={13} strokeWidth={1.75} />
       <span className="flex-1 truncate">
-        Configure {p.label} to use these models.
+        {tr("Configure {name} to use these models.", { name: p.label })}
       </span>
       <span className="shrink-0 text-[10px] underline-offset-2 group-hover:underline">
-        Open
+        {tr("Open")}
       </span>
     </button>
   );

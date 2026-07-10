@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { t, translateNode } from "@/modules/i18n";
 import type { ReactNode } from "react";
 
 type Props = {
@@ -17,10 +18,10 @@ export function SettingRow({ title, description, children, className }: Props) {
       )}
     >
       <div className="flex min-w-0 flex-col gap-0.5">
-        <span className="text-[12.5px] font-medium">{title}</span>
+        <span className="text-[12.5px] font-medium">{translateNode(title)}</span>
         {description ? (
           <span className="text-[10.5px] leading-relaxed text-muted-foreground">
-            {description}
+            {t(description)}
           </span>
         ) : null}
       </div>

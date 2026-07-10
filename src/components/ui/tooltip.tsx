@@ -4,6 +4,7 @@ import * as React from "react"
 import { Tooltip as TooltipPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
+import { translateNode } from "@/modules/i18n"
 
 function TooltipProvider({
   delayDuration = 0,
@@ -47,7 +48,7 @@ function TooltipContent({
         )}
         {...props}
       >
-        {children}
+        {translateNode(children)}
       </TooltipPrimitive.Content>
     </TooltipPrimitive.Portal>
   )

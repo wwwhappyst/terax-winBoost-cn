@@ -21,6 +21,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
+import { t as tr } from "@/modules/i18n";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   ArrowRight01Icon,
@@ -210,7 +211,9 @@ export function AiChatView({
         <ConversationContent>
           <ConversationEmptyState
             title="Ask Terax anything"
-            description="Explain command output, fix errors, generate snippets, or run a task."
+            description={tr(
+              "Explain command output, fix errors, generate snippets, or run a task.",
+            )}
           />
         </ConversationContent>
       </Conversation>
@@ -252,7 +255,7 @@ export function AiChatView({
         )}
         {error && (
           <div className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive">
-            <div className="font-medium">Something went wrong.</div>
+            <div className="font-medium">{tr("Something went wrong.")}</div>
             <div className="mt-0.5 leading-relaxed opacity-90">
               {error.message}
             </div>
@@ -261,7 +264,7 @@ export function AiChatView({
               onClick={clearError}
               className="mt-1 underline opacity-80 hover:opacity-100"
             >
-              Dismiss
+              {tr("Dismiss")}
             </button>
           </div>
         )}
@@ -282,15 +285,16 @@ const CompactionNotice = memo(function CompactionNotice({
     <div className="flex items-center gap-2 rounded-md border border-border/40 bg-muted/30 px-2.5 py-1.5 text-[11px] text-muted-foreground">
       <span className="size-1.5 shrink-0 rounded-full bg-amber-500/80" />
       <span className="flex-1 truncate">
-        Context compacted — {droppedCount} older tool result
-        {droppedCount === 1 ? "" : "s"} elided to save tokens.
+        {tr("Context compacted — {count} older tool results elided to save tokens.", {
+          count: droppedCount,
+        })}
       </span>
       <button
         type="button"
         onClick={onDismiss}
         className="text-[10.5px] underline opacity-70 hover:opacity-100"
       >
-        Dismiss
+        {tr("Dismiss")}
       </button>
     </div>
   );
@@ -304,14 +308,14 @@ const ContinueRow = memo(function ContinueRow({
   return (
     <div className="flex items-center gap-2 rounded-md border border-border/50 bg-card/60 px-2.5 py-1.5 text-[11px]">
       <span className="flex-1 text-muted-foreground">
-        Hit the step limit. Continue to keep going.
+        {tr("Hit the step limit. Continue to keep going.")}
       </span>
       <button
         type="button"
         onClick={onContinue}
         className="rounded-md border border-border/60 bg-background px-2 py-0.5 text-[11px] font-medium text-foreground transition-colors hover:bg-accent"
       >
-        Continue
+        {tr("Continue")}
       </button>
     </div>
   );
@@ -511,7 +515,9 @@ const ReadGroup = memo(function ReadGroup({ parts }: { parts: AnyPart[] }) {
           strokeWidth={1.75}
           className="shrink-0 text-muted-foreground"
         />
-        <span className="shrink-0 font-medium text-foreground">Read</span>
+        <span className="shrink-0 font-medium text-foreground">
+          {tr("Read")}
+        </span>
         <span className="shrink-0 text-[11px] text-muted-foreground">
           {count} file{count === 1 ? "" : "s"}
         </span>
@@ -578,7 +584,7 @@ const ReadRow = memo(function ReadRow({ part }: { part: AnyPart }) {
         strokeWidth={1.75}
         className="shrink-0 text-muted-foreground"
       />
-      <span className="shrink-0 font-medium text-foreground">Read</span>
+      <span className="shrink-0 font-medium text-foreground">{tr("Read")}</span>
       <span className="min-w-0 flex-1 truncate font-mono text-[11px] text-muted-foreground">
         {path ?? ""}
       </span>

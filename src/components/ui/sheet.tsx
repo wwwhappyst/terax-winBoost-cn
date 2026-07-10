@@ -2,6 +2,7 @@ import * as React from "react"
 import { Dialog as SheetPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
+import { t, translateNode } from "@/modules/i18n"
 import { Button } from "@/components/ui/button"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { Cancel01Icon } from "@hugeicons/core-free-icons"
@@ -75,7 +76,7 @@ function SheetContent({
               size="icon-sm"
             >
               <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} />
-              <span className="sr-only">Close</span>
+              <span className="sr-only">{t("Close")}</span>
             </Button>
           </SheetPrimitive.Close>
         )}
@@ -106,6 +107,7 @@ function SheetFooter({ className, ...props }: React.ComponentProps<"div">) {
 
 function SheetTitle({
   className,
+  children,
   ...props
 }: React.ComponentProps<typeof SheetPrimitive.Title>) {
   return (
@@ -116,12 +118,15 @@ function SheetTitle({
         className
       )}
       {...props}
-    />
+    >
+      {translateNode(children)}
+    </SheetPrimitive.Title>
   )
 }
 
 function SheetDescription({
   className,
+  children,
   ...props
 }: React.ComponentProps<typeof SheetPrimitive.Description>) {
   return (
@@ -129,7 +134,9 @@ function SheetDescription({
       data-slot="sheet-description"
       className={cn("text-sm text-muted-foreground", className)}
       {...props}
-    />
+    >
+      {translateNode(children)}
+    </SheetPrimitive.Description>
   )
 }
 

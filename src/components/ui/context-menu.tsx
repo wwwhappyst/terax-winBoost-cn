@@ -2,6 +2,7 @@ import * as React from "react"
 import { ContextMenu as ContextMenuPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
+import { translateNode } from "@/modules/i18n"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { ArrowRight01Icon, Tick02Icon } from "@hugeicons/core-free-icons"
 
@@ -78,6 +79,7 @@ function ContextMenuItem({
   className,
   inset,
   variant = "default",
+  children,
   ...props
 }: React.ComponentProps<typeof ContextMenuPrimitive.Item> & {
   inset?: boolean
@@ -93,7 +95,9 @@ function ContextMenuItem({
         className
       )}
       {...props}
-    />
+    >
+      {translateNode(children)}
+    </ContextMenuPrimitive.Item>
   )
 }
 

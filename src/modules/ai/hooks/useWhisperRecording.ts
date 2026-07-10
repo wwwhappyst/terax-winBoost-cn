@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { t } from "@/modules/i18n";
 import { useChatStore } from "../store/chatStore";
 import { usePreferencesStore } from "@/modules/settings/preferences";
 import { transcribeAudio, type SttOptions } from "../lib/stt";
@@ -100,7 +101,7 @@ export function useWhisperRecording({
           if (text.trim()) onResult(text.trim());
         } catch (e) {
           console.error("stt.transcribe", e);
-          toast.error(e instanceof Error ? e.message : "Transcription failed");
+          toast.error(e instanceof Error ? e.message : t("Transcription failed"));
         } finally {
           setState("idle");
         }
@@ -110,7 +111,7 @@ export function useWhisperRecording({
       setState("recording");
     } catch (e) {
       console.error("stt.getUserMedia", e);
-      toast.error("Microphone access failed");
+      toast.error(t("Microphone access failed"));
       teardownStream();
       setState("idle");
     }

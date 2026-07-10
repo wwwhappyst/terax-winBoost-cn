@@ -8,6 +8,7 @@ import {
   InputGroupText,
 } from "@/components/ui/input-group";
 import { cn } from "@/lib/utils";
+import { t as tr } from "@/modules/i18n";
 import { CheckmarkCircle01Icon, CopyIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import type { ComponentProps } from "react";
@@ -133,11 +134,11 @@ export const SnippetCopyButton = ({
 
   return (
     <InputGroupButton
-      aria-label="Copy"
+      aria-label={tr("Copy")}
       className={className}
       onClick={copyToClipboard}
       size="icon-sm"
-      title="Copy"
+      title={tr("Copy")}
       {...props}
     >
       {children ?? <HugeiconsIcon icon={Icon} size={14} className="size-3.5" />}

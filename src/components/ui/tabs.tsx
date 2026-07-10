@@ -3,6 +3,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { Tabs as TabsPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
+import { translateNode } from "@/modules/i18n"
 
 function Tabs({
   className,
@@ -55,6 +56,7 @@ function TabsList({
 
 function TabsTrigger({
   className,
+  children,
   ...props
 }: React.ComponentProps<typeof TabsPrimitive.Trigger>) {
   return (
@@ -68,7 +70,9 @@ function TabsTrigger({
         className
       )}
       {...props}
-    />
+    >
+      {translateNode(children)}
+    </TabsPrimitive.Trigger>
   )
 }
 

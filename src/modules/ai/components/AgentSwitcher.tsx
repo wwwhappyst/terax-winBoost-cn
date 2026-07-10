@@ -7,6 +7,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { t as tr } from "@/modules/i18n";
 import { openSettingsWindow } from "@/modules/settings/openSettingsWindow";
 import {
   AbsoluteIcon,
@@ -71,7 +72,7 @@ export function AgentSwitcher({ isMiniWindow }: { isMiniWindow?: boolean }) {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="min-w-60">
         <div className="px-2 pt-1.5 pb-1 text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
-          Built-in
+          {tr("Built-in")}
         </div>
         {builtIn.map((a) => {
           const Icon = ICONS[a.icon] ?? SparklesIcon;
@@ -116,7 +117,7 @@ export function AgentSwitcher({ isMiniWindow }: { isMiniWindow?: boolean }) {
           <>
             <DropdownMenuSeparator />
             <div className="px-2 pt-1 pb-1 text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
-              Custom
+              {tr("Custom")}
             </div>
             {custom.map((a) => {
               const Icon = ICONS[a.icon] ?? SparklesIcon;
@@ -162,7 +163,7 @@ export function AgentSwitcher({ isMiniWindow }: { isMiniWindow?: boolean }) {
           className="gap-2 text-[12px] text-muted-foreground"
         >
           <HugeiconsIcon icon={Settings01Icon} size={12} strokeWidth={1.75} />
-          Manage agents…
+          {tr("Manage agents…")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

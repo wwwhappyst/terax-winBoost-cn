@@ -1,5 +1,6 @@
 import { PopoverContent } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { t as tr } from "@/modules/i18n";
 import { HugeiconsIcon } from "@hugeicons/react";
 import type { SlashCommandMeta } from "../lib/slashCommands";
 import type { Snippet } from "../lib/snippets";
@@ -37,7 +38,7 @@ export function SnippetPickerContent({
     >
       {items.length === 0 ? (
         <div className="px-3 py-2.5 text-[11px] text-muted-foreground">
-          No matches. Add snippets in Settings → Agents.
+          {tr("No matches. Add snippets in Settings → Agents.")}
         </div>
       ) : (
         <div className="max-h-64 overflow-y-auto py-1">

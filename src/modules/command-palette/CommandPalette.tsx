@@ -8,6 +8,7 @@ import {
   CommandShortcut,
 } from "@/components/ui/command";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { t as tr } from "@/modules/i18n";
 import { fileIconUrl } from "@/modules/explorer/lib/iconResolver";
 import { usePreferencesStore } from "@/modules/settings/preferences";
 import {
@@ -246,7 +247,7 @@ export function CommandPalette({
                     size={14}
                     strokeWidth={1.75}
                   />
-                  <span>Back</span>
+                  <span>{tr("Back")}</span>
                 </CommandItem>
                 {themes.map((t) => (
                   <CommandItem
@@ -430,7 +431,7 @@ function ActionItem({
           className="text-muted-foreground"
         />
       ) : null}
-      <span className="truncate">{item.title}</span>
+      <span className="truncate">{tr(item.title)}</span>
       {rightLabel ? (
         <CommandShortcut
           className={item.disabledReason ? "normal-case tracking-normal" : ""}
@@ -462,7 +463,7 @@ function AsyncBody({
       <>
         <StatusItem label="Search failed" tone="error" />
         <CommandItem value="retry" onSelect={onRetry} className="text-[12.5px]">
-          <span>Retry</span>
+          <span>{tr("Retry")}</span>
         </CommandItem>
       </>
     );
@@ -506,7 +507,7 @@ function EmptyHint() {
   return (
     <div className="flex flex-col items-center gap-2 px-4 py-10 text-center text-sm text-muted-foreground">
       <HugeiconsIcon icon={CommandIcon} size={18} strokeWidth={1.5} />
-      <span>No commands found. Type ? to see search modes.</span>
+      <span>{tr("No commands found. Type ? to see search modes.")}</span>
     </div>
   );
 }

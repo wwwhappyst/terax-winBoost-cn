@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/hover-card";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
+import { t as tr } from "@/modules/i18n";
 import type { LanguageModelUsage } from "ai";
 import type { ComponentProps } from "react";
 import { createContext, useContext, useMemo } from "react";
@@ -64,7 +65,7 @@ const ContextIcon = () => {
 
   return (
     <svg
-      aria-label="Model context usage"
+      aria-label={tr("Model context usage")}
       height="20"
       role="img"
       style={{ color: "currentcolor" }}

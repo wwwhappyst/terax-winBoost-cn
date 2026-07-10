@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { t as tr } from "@/modules/i18n";
 import {
   Cancel01Icon,
   Edit02Icon,
@@ -50,7 +51,7 @@ function AiToolApprovalImpl({ part, toolName, onRespond }: Props) {
           {label}
         </span>
         <span className="ml-auto text-[10px] text-muted-foreground">
-          needs approval
+          {tr("needs approval")}
         </span>
       </div>
 
@@ -66,7 +67,7 @@ function AiToolApprovalImpl({ part, toolName, onRespond }: Props) {
           className="h-7 gap-1.5 text-[11px]"
         >
           <HugeiconsIcon icon={Cancel01Icon} size={12} strokeWidth={2} />
-          Deny
+          {tr("Deny")}
         </Button>
         <Button
           size="sm"
@@ -75,7 +76,7 @@ function AiToolApprovalImpl({ part, toolName, onRespond }: Props) {
           className="h-7 gap-1.5 text-[11px]"
         >
           <HugeiconsIcon icon={Tick02Icon} size={12} strokeWidth={2} />
-          Approve
+          {tr("Approve")}
         </Button>
       </div>
     </div>

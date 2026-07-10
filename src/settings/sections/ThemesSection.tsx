@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
+import { t as tr, translateNode } from "@/modules/i18n";
 import { usePreferencesStore } from "@/modules/settings/preferences";
 import {
   EDITOR_THEME_AUTO,
@@ -281,7 +282,7 @@ export function ThemesSection() {
           <div className="flex min-w-0 flex-col">
             <Label>Editor theme</Label>
             <span className="text-[11px] text-muted-foreground">
-              Syntax colors for the code editor. Auto follows the app theme.
+              {tr("Syntax colors for the code editor. Auto follows the app theme.")}
             </span>
           </div>
           <Select
@@ -371,7 +372,7 @@ export function ThemesSection() {
           <div className="flex flex-col gap-3 rounded-lg border border-border/60 p-3">
             <div className="flex items-center justify-between gap-3">
               <span className="text-[11.5px] text-muted-foreground">
-                Opacity
+                {tr("Opacity")}
               </span>
               <span className="tabular-nums text-[11px] text-muted-foreground">
                 {Math.round(backgroundOpacity * 100)}%
@@ -385,7 +386,9 @@ export function ThemesSection() {
               onValueChange={(v) => void setBackgroundOpacity(v[0] ?? 0)}
             />
             <div className="flex items-center justify-between gap-3 pt-1">
-              <span className="text-[11.5px] text-muted-foreground">Blur</span>
+              <span className="text-[11.5px] text-muted-foreground">
+                {tr("Blur")}
+              </span>
               <span className="tabular-nums text-[11px] text-muted-foreground">
                 {backgroundBlur}px
               </span>
@@ -400,8 +403,9 @@ export function ThemesSection() {
           </div>
         ) : (
           <p className="text-[11px] text-muted-foreground">
-            Drop an image here or pick one. Stored locally; doesn't affect the
-            default look until set.
+            {tr(
+              "Drop an image here or pick one. Stored locally; doesn't affect the default look until set.",
+            )}
           </p>
         )}
       </div>
@@ -412,7 +416,7 @@ export function ThemesSection() {
 function Label({ children }: { children: React.ReactNode }) {
   return (
     <span className="text-[11px] font-medium tracking-tight text-muted-foreground">
-      {children}
+      {translateNode(children)}
     </span>
   );
 }

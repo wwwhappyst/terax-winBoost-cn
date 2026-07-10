@@ -13,6 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { t as tr } from "@/modules/i18n";
 import { usePreferencesStore } from "@/modules/settings/preferences";
 import { currentWorkspaceEnv } from "@/modules/workspace";
 import {
@@ -84,7 +85,9 @@ export function CwdBreadcrumb({ cwd, filePath, home, onCd }: Props) {
 
   if (!cwd) {
     return (
-      <span className="text-xs text-muted-foreground/70">no directory</span>
+      <span className="text-xs text-muted-foreground/70">
+        {tr("no directory")}
+      </span>
     );
   }
 

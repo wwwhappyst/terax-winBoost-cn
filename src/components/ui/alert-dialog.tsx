@@ -2,6 +2,7 @@ import * as React from "react"
 import { AlertDialog as AlertDialogPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
+import { translateNode } from "@/modules/i18n"
 import { Button } from "@/components/ui/button"
 
 function AlertDialog({
@@ -115,6 +116,7 @@ function AlertDialogMedia({
 
 function AlertDialogTitle({
   className,
+  children,
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Title>) {
   return (
@@ -125,12 +127,15 @@ function AlertDialogTitle({
         className
       )}
       {...props}
-    />
+    >
+      {translateNode(children)}
+    </AlertDialogPrimitive.Title>
   )
 }
 
 function AlertDialogDescription({
   className,
+  children,
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Description>) {
   return (
@@ -141,7 +146,9 @@ function AlertDialogDescription({
         className
       )}
       {...props}
-    />
+    >
+      {translateNode(children)}
+    </AlertDialogPrimitive.Description>
   )
 }
 

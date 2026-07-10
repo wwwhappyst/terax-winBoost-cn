@@ -2,6 +2,7 @@ import * as React from "react"
 import { DropdownMenu as DropdownMenuPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
+import { translateNode } from "@/modules/i18n"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { Tick02Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons"
 
@@ -61,6 +62,7 @@ function DropdownMenuItem({
   className,
   inset,
   variant = "default",
+  children,
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Item> & {
   inset?: boolean
@@ -76,7 +78,9 @@ function DropdownMenuItem({
         className
       )}
       {...props}
-    />
+    >
+      {translateNode(children)}
+    </DropdownMenuPrimitive.Item>
   )
 }
 
@@ -158,6 +162,7 @@ function DropdownMenuRadioItem({
 function DropdownMenuLabel({
   className,
   inset,
+  children,
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Label> & {
   inset?: boolean
@@ -171,7 +176,9 @@ function DropdownMenuLabel({
         className
       )}
       {...props}
-    />
+    >
+      {translateNode(children)}
+    </DropdownMenuPrimitive.Label>
   )
 }
 

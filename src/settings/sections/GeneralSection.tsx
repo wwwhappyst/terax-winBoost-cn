@@ -14,7 +14,12 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { type AppLanguage, useTranslation } from "@/modules/i18n";
+import {
+  type AppLanguage,
+  t as tr,
+  translateNode,
+  useTranslation,
+} from "@/modules/i18n";
 import { usePreferencesStore } from "@/modules/settings/preferences";
 import type { ThemePref } from "@/modules/settings/store";
 import {
@@ -182,13 +187,12 @@ export function GeneralSection() {
               )}
             >
               <HugeiconsIcon icon={o.icon} size={18} strokeWidth={1.5} />
-              <span className="text-[11.5px]">{o.label}</span>
+              <span className="text-[11.5px]">{tr(o.label)}</span>
             </button>
           ))}
         </div>
         <p className="text-[11px] text-muted-foreground">
-          For theme, background and customization, see the{" "}
-          <strong className="font-medium text-foreground">Themes</strong> tab.
+          {tr("For theme, background and customization, see the Themes tab.")}
         </p>
       </div>
 
@@ -197,7 +201,7 @@ export function GeneralSection() {
         <div className="flex flex-col gap-3 rounded-lg border border-border/60 p-3">
           <div className="flex items-center justify-between gap-3">
             <span className="text-[11.5px] text-muted-foreground">
-              UI zoom level
+              {tr("UI zoom level")}
             </span>
             <span className="tabular-nums text-[11px] text-muted-foreground">
               {Math.round(zoomLevel * 100)}%
@@ -240,23 +244,21 @@ export function GeneralSection() {
         <SettingRow
           title={
             <span className="inline-flex items-center gap-1.5">
-              Use WebGL renderer
+              {tr("Use WebGL renderer")}
               <TooltipProvider delayDuration={200}>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <span
                       className="cursor-help text-[11px] text-muted-foreground/70 leading-none"
-                      aria-label="More info about WebGL renderer"
+                      aria-label={tr("More info about WebGL renderer")}
                     >
                       ⓘ
                     </span>
                   </TooltipTrigger>
                   <TooltipContent side="top" className="max-w-65 text-[11px]">
-                    xterm's WebGL renderer caches glyphs in a GPU texture atlas.
-                    On some macOS setups (especially with Nerd Fonts), the atlas
-                    corrupts and terminal text becomes unreadable. Turn this off
-                    as a fallback — performance dips slightly, but text renders
-                    correctly via the DOM renderer.
+                    {tr(
+                      "xterm's WebGL renderer caches glyphs in a GPU texture atlas. On some macOS setups (especially with Nerd Fonts), the atlas corrupts and terminal text becomes unreadable. Turn this off as a fallback — performance dips slightly, but text renders correctly via the DOM renderer.",
+                    )}
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -379,7 +381,7 @@ export function GeneralSection() {
                       value={defaultWorkspaceEnv}
                       className="text-[12px]"
                     >
-                      {defaultWorkspaceEnv.slice("wsl:".length)} (unavailable)
+                      {defaultWorkspaceEnv.slice("wsl:".length)} ({tr("unavailable")})
                     </SelectItem>
                   )}
               </SelectContent>
@@ -445,7 +447,7 @@ export function GeneralSection() {
                   value={String(lines)}
                   className="text-[12px]"
                 >
-                  {lines.toLocaleString()} lines
+                  {tr("{count} lines", { count: lines.toLocaleString() })}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -457,7 +459,7 @@ export function GeneralSection() {
         <Label>Agents</Label>
         <SettingRow
           title="Coding agent notifications"
-          description="Alert when Claude Code or Codex running in a terminal needs your input or finishes. Desktop notification when Terax is unfocused, in-app otherwise."
+          description="Alert when a coding agent in a terminal needs your input or finishes. Desktop notification when Terax is unfocused, in-app otherwise."
         >
           <Switch
             checked={agentNotifications}
@@ -496,7 +498,7 @@ export function GeneralSection() {
 function Label({ children }: { children: React.ReactNode }) {
   return (
     <span className="text-[11px] font-medium tracking-tight text-muted-foreground">
-      {children}
+      {translateNode(children)}
     </span>
   );
 }
@@ -530,7 +532,7 @@ function FontFamilyInput({
       <input
         type="text"
         value={draft}
-        placeholder="Auto-detect"
+        placeholder={tr("Auto-detect")}
         onChange={(e) => setDraft(e.target.value)}
         onBlur={commit}
         onKeyDown={(e) => {

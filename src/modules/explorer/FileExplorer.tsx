@@ -26,6 +26,7 @@ import {
   useState,
 } from "react";
 import { cn } from "@/lib/utils";
+import { t as tr } from "@/modules/i18n";
 import { ExplorerSearch, type ExplorerSearchHandle } from "./ExplorerSearch";
 import { EntryRow, PendingRow, StatusRow, type RowActions } from "./TreeRow";
 import { InlineInput } from "./InlineInput";
@@ -361,7 +362,7 @@ export const FileExplorer = memo(
             className="text-muted-foreground"
           />
           <div className="text-xs text-muted-foreground">
-            No current directory
+            {tr("No current directory")}
           </div>
         </div>
       );

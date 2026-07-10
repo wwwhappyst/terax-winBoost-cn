@@ -7,6 +7,7 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { t as tr } from "@/modules/i18n";
 import {
   native,
   type GitCommitFileChange,
@@ -511,13 +512,13 @@ export function GitHistoryPane({
           <CenterPlaceholder>
             <Spinner className="size-4" />
             <span className="text-[11.5px] text-muted-foreground">
-              Loading commits…
+              {tr("Loading commits…")}
             </span>
           </CenterPlaceholder>
         ) : loadStatus === "error" && commits.length === 0 ? (
           <CenterPlaceholder>
             <div className="text-[13px] font-medium">
-              Could not load history
+              {tr("Could not load history")}
             </div>
             <div className="max-w-md text-[11px] leading-relaxed text-muted-foreground">
               {error ?? "Unknown error"}
@@ -528,9 +529,9 @@ export function GitHistoryPane({
           </CenterPlaceholder>
         ) : commits.length === 0 ? (
           <CenterPlaceholder>
-            <div className="text-[13px] font-medium">No commits yet</div>
+            <div className="text-[13px] font-medium">{tr("No commits yet")}</div>
             <div className="max-w-md text-[11px] leading-relaxed text-muted-foreground">
-              This branch has no commits.
+              {tr("This branch has no commits.")}
             </div>
           </CenterPlaceholder>
         ) : (
@@ -544,11 +545,11 @@ export function GitHistoryPane({
             >
               <div />
               <div className="pl-px">SHA</div>
-              <div className="min-w-0">Subject</div>
+              <div className="min-w-0">{tr("Subject")}</div>
               <div />
-              <div className="ml-2">Author</div>
-              <div className="text-right">Date</div>
-              <div className="text-right">Changes</div>
+              <div className="ml-2">{tr("Author")}</div>
+              <div className="text-right">{tr("Date")}</div>
+              <div className="text-right">{tr("Changes")}</div>
             </div>
             <div
               ref={scrollRef}
@@ -594,12 +595,12 @@ export function GitHistoryPane({
               {loadStatus === "more" ? (
                 <div className="flex items-center justify-center gap-2 py-3 text-[11px] text-muted-foreground">
                   <Spinner className="size-3" />
-                  Loading more…
+                  {tr("Loading more…")}
                 </div>
               ) : null}
               {endReached && !activeSearch ? (
                 <div className="py-3 text-center text-[10.5px] text-muted-foreground/65">
-                  End of history
+                  {tr("End of history")}
                 </div>
               ) : null}
               {loadStatus === "error" && commits.length > 0 ? (
@@ -923,7 +924,7 @@ function CommitFiles({
     return (
       <div className="flex items-center gap-2 px-3 py-3 text-[11px] text-muted-foreground">
         <Spinner className="size-3" />
-        Loading files…
+        {tr("Loading files…")}
       </div>
     );
   }
@@ -945,14 +946,14 @@ function CommitFiles({
   if (filesEntry.files.length === 0) {
     return (
       <div className="px-3 py-3 text-[11px] text-muted-foreground">
-        No file changes.
+        {tr("No file changes.")}
       </div>
     );
   }
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex shrink-0 items-center justify-between px-3 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground/85">
-        <span>Files</span>
+        <span>{tr("Files")}</span>
         <span className="rounded-sm bg-muted/55 px-1 py-px text-[9.5px] tabular-nums text-muted-foreground/85 normal-case tracking-normal">
           {filesEntry.files.length}
         </span>
@@ -1006,7 +1007,7 @@ const FileRow = memo(function FileRow({
       </div>
       <div className="flex shrink-0 items-center gap-1 text-[10px] tabular-nums">
         {file.isBinary ? (
-          <span className="text-muted-foreground/70">binary</span>
+          <span className="text-muted-foreground/70">{tr("binary")}</span>
         ) : (
           <>
             {file.added > 0 ? (

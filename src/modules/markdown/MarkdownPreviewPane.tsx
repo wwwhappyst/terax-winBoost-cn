@@ -1,5 +1,6 @@
 import { MarkdownCode } from "@/components/ai-elements/markdown-code";
 import { cn } from "@/lib/utils";
+import { t as tr } from "@/modules/i18n";
 import { currentWorkspaceEnv } from "@/modules/workspace";
 import { invoke } from "@tauri-apps/api/core";
 import { useEffect, useState } from "react";
@@ -65,21 +66,26 @@ export function MarkdownPreviewPane({ path, visible, onSetView }: Props) {
       <div className="flex-1 overflow-auto">
         <div className="px-8 py-6">
           {status.kind === "loading" && (
-            <p className="text-[12px] text-muted-foreground">Loading…</p>
+            <p className="text-[12px] text-muted-foreground">
+              {tr("Loading…")}
+            </p>
           )}
           {status.kind === "error" && (
             <p className="text-[12px] text-destructive">
-              Failed to read file: {status.message}
+              {tr("Failed to read file:")} {status.message}
             </p>
           )}
           {status.kind === "binary" && (
             <p className="text-[12px] text-muted-foreground">
-              Binary file — cannot render as markdown.
+              {tr("Binary file — cannot render as markdown.")}
             </p>
           )}
           {status.kind === "toolarge" && (
             <p className="text-[12px] text-muted-foreground">
-              File is {status.size} bytes; limit {status.limit}.
+              {tr("File is {size} bytes; limit {limit}.", {
+                size: status.size,
+                limit: status.limit,
+              })}
             </p>
           )}
           {status.kind === "ready" && (

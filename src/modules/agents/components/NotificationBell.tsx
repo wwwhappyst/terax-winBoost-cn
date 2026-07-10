@@ -28,12 +28,12 @@ type Props = {
 
 function relativeTime(ts: number): string {
   const s = Math.floor((Date.now() - ts) / 1000);
-  if (s < 60) return "just now";
+  if (s < 60) return t("just now");
   const m = Math.floor(s / 60);
-  if (m < 60) return `${m}m ago`;
+  if (m < 60) return t("{count}m ago", { count: m });
   const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h ago`;
-  return `${Math.floor(h / 24)}d ago`;
+  if (h < 24) return t("{count}h ago", { count: h });
+  return t("{count}d ago", { count: Math.floor(h / 24) });
 }
 
 function StatusRow({
@@ -67,7 +67,7 @@ function StatusRow({
         )}
       >
         {waiting ? <span className="size-1.5 rounded-full bg-primary" /> : null}
-        {waiting ? "waiting" : "working"}
+        {t(waiting ? "waiting" : "working")}
       </span>
     </button>
   );
@@ -107,7 +107,7 @@ function HookAgentRow({
             size={13}
             strokeWidth={1.75}
           />
-          enabled
+          {t("enabled")}
         </span>
       ) : (
         <button
@@ -124,7 +124,7 @@ function HookAgentRow({
               className="animate-spin"
             />
           ) : null}
-          {installing ? "Enabling" : "Enable"}
+          {t(installing ? "Enabling" : "Enable")}
         </button>
       )}
     </div>
@@ -163,7 +163,7 @@ function NotificationRow({
       </span>
       <span className="min-w-0 flex-1 truncate text-sm text-foreground">
         {displayAgent(n.agent)}{" "}
-        <span className="text-muted-foreground">{NOTIF_LABEL[n.kind]}</span>
+        <span className="text-muted-foreground">{t(NOTIF_LABEL[n.kind])}</span>
       </span>
       <span className="shrink-0 text-[10px] tabular-nums text-muted-foreground">
         {relativeTime(n.at)}
@@ -270,12 +270,12 @@ export function NotificationBell({ onActivate, onActivateLocal }: Props) {
       >
         <div className="flex h-10 items-center gap-2 px-3 pt-0.5">
           <span className="flex gap-1 text-[13px] text-foreground">
-            Notifications
+            {t("Notifications")}
           </span>
           <div className="ml-auto flex items-center gap-2">
             {activeCount > 0 ? (
               <span className="rounded-full bg-accent px-1.5 py-0.5 text-[10px] font-medium tabular-nums text-muted-foreground">
-                {activeCount} active
+                {t("{count} active", { count: activeCount })}
               </span>
             ) : null}
             {notifications.length > 0 ? (
@@ -284,7 +284,7 @@ export function NotificationBell({ onActivate, onActivateLocal }: Props) {
                 onClick={clearNotifications}
                 className="rounded-md px-1.5 py-0.5 text-[11px] text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
               >
-                Clear
+                {t("Clear")}
               </button>
             ) : null}
           </div>
@@ -292,9 +292,9 @@ export function NotificationBell({ onActivate, onActivateLocal }: Props) {
 
         {empty ? (
           <div className="border-t border-border/60 px-3 py-5 text-center text-xs leading-relaxed text-muted-foreground">
-            No agent activity yet.
+            {t("No agent activity yet.")}
             <br />
-            Run the Terax agent or a coding agent to track it here.
+            {t("Run the Terax agent or a coding agent to track it here.")}
           </div>
         ) : (
           <div className="max-h-80 overflow-y-auto border-t border-border/60 p-1">
@@ -329,7 +329,7 @@ export function NotificationBell({ onActivate, onActivateLocal }: Props) {
         <div className="border-t border-border/60 p-1">
           <div className="flex items-center gap-1.5 px-2 pt-1 pb-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground/70">
             <HugeiconsIcon icon={Notification03Icon} size={11} strokeWidth={2} />
-            Agent alerts
+            {t("Agent alerts")}
           </div>
           {HOOK_AGENTS.map((id) => (
             <HookAgentRow

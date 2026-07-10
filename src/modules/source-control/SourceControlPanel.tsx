@@ -9,6 +9,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { t as tr } from "@/modules/i18n";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   ContextMenu,
@@ -257,7 +258,7 @@ function BranchDropdown({
         {loading ? (
           <div className="flex items-center gap-2 px-3 py-3 text-[11px] text-muted-foreground">
             <Spinner className="size-3" />
-            Loading branches…
+            {tr("Loading branches…")}
           </div>
         ) : error ? (
           <div className="px-3 py-3 text-[11px] leading-snug text-destructive">
@@ -331,7 +332,7 @@ function BranchDropdown({
             )}
             {branches.length === 0 && (
               <div className="px-3 py-3 text-[11px] text-muted-foreground">
-                No branches found.
+                {tr("No branches found.")}
               </div>
             )}
           </>
@@ -650,7 +651,7 @@ export const SourceControlPanel = memo(function SourceControlPanel({
             ) : null}
             {scm.status?.isDetached ? (
               <span className="rounded bg-muted/55 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-                detached
+                {tr("detached")}
               </span>
             ) : null}
           </div>
@@ -729,7 +730,9 @@ export const SourceControlPanel = memo(function SourceControlPanel({
               strokeWidth={1.85}
               className="shrink-0"
             />
-            <span className="flex-1 text-[12px] font-medium">Commit Graph</span>
+            <span className="flex-1 text-[12px] font-medium">
+              {tr("Commit Graph")}
+            </span>
             <HugeiconsIcon
               icon={ArrowRight01Icon}
               size={12}
@@ -789,7 +792,7 @@ export const SourceControlPanel = memo(function SourceControlPanel({
                     <span>Ch: {scm.commitMessage.length}</span>
                   ) : (
                     <span className="flex gap-2 items-center">
-                      {commitShortcut} <p>to commit</p>
+                      {commitShortcut} <p>{tr("to commit")}</p>
                     </span>
                   )}
                 </div>
@@ -908,7 +911,7 @@ export const SourceControlPanel = memo(function SourceControlPanel({
                 ref={containerRef}
                 tabIndex={0}
                 role="listbox"
-                aria-label="Changed files"
+                aria-label={tr("Changed files")}
                 aria-activedescendant={
                   focusedRowKey ? `scm-row-${focusedRowKey}` : undefined
                 }
@@ -1008,10 +1011,10 @@ function PanelCenter({
 }) {
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-2 px-6 text-center">
-      <div className="text-sm font-medium">{title}</div>
+      <div className="text-sm font-medium">{tr(title)}</div>
       {body ? (
         <div className="max-w-64 text-[11px] leading-relaxed text-muted-foreground">
-          {body}
+          {tr(body)}
         </div>
       ) : null}
       {action}
@@ -1030,10 +1033,10 @@ function CleanTreeHint({ repoLabel }: { repoLabel: string }) {
         />
       </div>
       <div className="text-[12px] font-medium text-foreground">
-        Working tree clean
+        {tr("Working tree clean")}
       </div>
       <div className="text-[10.5px] leading-snug text-muted-foreground">
-        on <span className="font-mono text-foreground/80">{repoLabel}</span>
+        {tr("on")} <span className="font-mono text-foreground/80">{repoLabel}</span>
       </div>
     </div>
   );
@@ -1077,9 +1080,9 @@ function DivergedBanner() {
       />
       <span className="min-w-0 flex-1 truncate">
         <span className="font-medium text-foreground/85">
-          Diverged from upstream
+          {tr("Diverged from upstream")}
         </span>
-        <span className="ml-1 opacity-75">— resolve in terminal</span>
+        <span className="ml-1 opacity-75">{tr("— resolve in terminal")}</span>
       </span>
     </div>
   );
@@ -1102,9 +1105,9 @@ function ListHeader({
         {row.count}
       </span>
       <label className="ml-auto flex shrink-0 cursor-pointer select-none items-center gap-1.5 text-[10.5px] font-medium text-muted-foreground hover:text-foreground">
-        <span>All</span>
+        <span>{tr("All")}</span>
         <Checkbox
-          aria-label="Stage all changes"
+          aria-label={tr("Stage all changes")}
           checked={checkboxValue(headerCheckState)}
           disabled={actionBusy !== null}
           onCheckedChange={() => void onToggleAll()}

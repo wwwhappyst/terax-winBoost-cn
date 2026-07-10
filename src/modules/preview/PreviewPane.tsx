@@ -1,5 +1,6 @@
 import { Alert02Icon, Globe02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { t as tr } from "@/modules/i18n";
 import {
   forwardRef,
   useEffect,
@@ -84,8 +85,9 @@ export const PreviewPane = forwardRef<PreviewPaneHandle, Props>(
               className="shrink-0"
             />
             <span className="truncate">
-              Many public sites refuse to embed (X-Frame-Options). If the page
-              is blank, open it externally.
+              {tr(
+                "Many public sites refuse to embed (X-Frame-Options). If the page is blank, open it externally.",
+              )}
             </span>
           </div>
         ) : null}
@@ -138,10 +140,10 @@ function SuspendedState({ onReload }: { onReload: () => void }) {
       </div>
       <div className="space-y-1">
         <p className="text-[12.5px] font-medium text-foreground">
-          Preview suspended
+          {tr("Preview suspended")}
         </p>
         <p className="max-w-xs text-[11px] leading-relaxed text-muted-foreground">
-          Released to free memory after sitting in the background.
+          {tr("Released to free memory after sitting in the background.")}
         </p>
       </div>
       <button
@@ -163,16 +165,16 @@ function EmptyState() {
       </div>
       <div className="space-y-1.5">
         <p className="text-sm font-medium text-foreground">
-          Nothing to preview yet
+          {tr("Nothing to preview yet")}
         </p>
         <p className="max-w-sm text-xs leading-relaxed text-muted-foreground">
-          Type a URL above, or open the{" "}
+          {tr("Type a URL above, or open the")} {" "}
           <span className="rounded bg-muted px-1 py-0.5 font-mono text-[10.5px]">
-            Ports
+            {tr("Ports")}
           </span>{" "}
-          dropdown to jump straight to your running dev server. Public sites
-          often block embedding — open them in your browser via the link icon
-          if you see a blank page.
+          {tr(
+            "dropdown to jump straight to your running dev server. Public sites often block embedding — open them in your browser via the link icon if you see a blank page.",
+          )}
         </p>
       </div>
     </div>

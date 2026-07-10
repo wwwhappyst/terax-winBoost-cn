@@ -16,6 +16,7 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { fmtShortcut, MOD_KEY, SHIFT_KEY } from "@/lib/platform";
 import { cn } from "@/lib/utils";
+import { t as tr } from "@/modules/i18n";
 import {
   ALL_LANGUAGES,
   EXPOSED_LANGUAGES,
@@ -449,7 +450,7 @@ export function TabBar({
                     </span>
                     {t.kind === "editor" && t.dirty ? (
                       <span
-                        aria-label="Unsaved changes"
+                        aria-label={tr("Unsaved changes")}
                         className="size-1.5 shrink-0 rounded-full bg-foreground/70"
                       />
                     ) : null}
@@ -457,7 +458,7 @@ export function TabBar({
                   {tabs.length > 1 && (
                     <span
                       role="button"
-                      aria-label="Close tab"
+                      aria-label={tr("Close tab")}
                       data-no-drag
                       onClick={(e) => {
                         e.stopPropagation();
@@ -741,7 +742,7 @@ function TabRenameInput({
     <input
       ref={ref}
       defaultValue={initial}
-      aria-label="Rename tab"
+      aria-label={tr("Rename tab")}
       className={cn(
         "w-28 min-w-0 rounded-sm bg-background px-1 text-xs text-foreground",
         "outline-none ring-1 ring-border focus:ring-ring",

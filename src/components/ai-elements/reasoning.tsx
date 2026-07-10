@@ -6,6 +6,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
+import { t as tr } from "@/modules/i18n";
 import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useControllableState } from "@radix-ui/react-use-controllable-state";
@@ -151,12 +152,12 @@ export type ReasoningTriggerProps = ComponentProps<
 
 const defaultGetThinkingMessage = (isStreaming: boolean, duration?: number) => {
   if (isStreaming || duration === 0) {
-    return <Shimmer duration={1}>Thinking</Shimmer>;
+    return <Shimmer duration={1}>{tr("Thinking")}</Shimmer>;
   }
   if (duration === undefined) {
-    return <span>Reasoned</span>;
+    return <span>{tr("Reasoned")}</span>;
   }
-  return <span>Reasoned for {duration}s</span>;
+  return <span>{tr("Reasoned for {count}s", { count: duration })}</span>;
 };
 
 export const ReasoningTrigger = memo(

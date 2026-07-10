@@ -1,6 +1,7 @@
 import { Popover, PopoverAnchor } from "@/components/ui/popover";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
+import { t as tr } from "@/modules/i18n";
 import { usePresence } from "@/lib/usePresence";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useWorkspaceFiles } from "../hooks/useWorkspaceFiles";
@@ -257,7 +258,9 @@ export function AiComposerInput() {
                   c.submit();
                 }
               }}
-              placeholder="Ask Terax anything   -   # for snippets and commands, @ for files"
+              placeholder={tr(
+                "Ask Terax anything   -   # for snippets and commands, @ for files",
+              )}
               rows={1}
               className={cn(
                 "max-h-40 flex-1 resize-none bg-transparent text-[13px] leading-relaxed outline-none",

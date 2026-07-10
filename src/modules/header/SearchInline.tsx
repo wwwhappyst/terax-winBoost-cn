@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { KEY_SEP } from "@/lib/platform";
+import { t as tr } from "@/modules/i18n";
 import type { EditorPaneHandle } from "@/modules/editor";
 import { usePreferencesStore } from "@/modules/settings/preferences";
 import { getBindingTokens, SHORTCUTS } from "@/modules/shortcuts/shortcuts";
@@ -182,7 +183,7 @@ export const SearchInline = forwardRef<SearchInlineHandle, Props>(
                   inputRef.current?.focus();
                 }}
                 className="absolute top-1/2 right-1.5 -translate-y-1/2 rounded p-0.5 text-muted-foreground hover:bg-accent hover:text-foreground"
-                aria-label="Clear search"
+                aria-label={tr("Clear search")}
               >
                 <HugeiconsIcon icon={Cancel01Icon} size={11} strokeWidth={2} />
               </button>

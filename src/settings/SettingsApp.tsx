@@ -1,6 +1,7 @@
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { WindowControls } from "@/components/WindowControls";
 import { IS_MAC, USE_CUSTOM_WINDOW_CONTROLS } from "@/lib/platform";
+import { t as tr } from "@/modules/i18n";
 import type { SettingsTab } from "@/modules/settings/openSettingsWindow";
 import { usePreferencesStore } from "@/modules/settings/preferences";
 import {
@@ -101,6 +102,8 @@ export function SettingsApp() {
   useEffect(() => {
     // 设置窗口独立运行，需要同步自己的根元素语言。
     document.documentElement.lang = language;
+    // 原生窗口标题不经过 React 渲染，语言切换时单独同步。
+    void getCurrentWebviewWindow().setTitle(tr("Settings"));
   }, [language]);
 
   useEffect(() => {
@@ -145,7 +148,7 @@ export function SettingsApp() {
                 className="h-6 gap-1.5 px-2.5 text-[11.5px]"
               >
                 <HugeiconsIcon icon={t.icon} size={12} strokeWidth={1.75} />
-                <span>{t.label}</span>
+                <span>{tr(t.label)}</span>
               </TabsTrigger>
             ))}
           </TabsList>

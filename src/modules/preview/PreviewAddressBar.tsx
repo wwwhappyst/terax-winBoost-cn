@@ -6,6 +6,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { t as tr } from "@/modules/i18n";
 import {
   ArrowReloadHorizontalIcon,
   Globe02Icon,
@@ -140,7 +141,7 @@ export const PreviewAddressBar = forwardRef<PreviewAddressBarHandle, Props>(
                 size={13}
                 strokeWidth={1.75}
               />
-              <span className="hidden sm:inline">Ports</span>
+              <span className="hidden sm:inline">{tr("Ports")}</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent

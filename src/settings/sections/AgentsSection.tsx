@@ -9,6 +9,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { t as tr, translateNode } from "@/modules/i18n";
 import { AGENT_ICONS } from "@/modules/ai/components/AgentSwitcher";
 import {
   type Agent,
@@ -119,7 +120,7 @@ export function AgentsSection() {
           <div className="flex flex-col">
             <Label>Snippets</Label>
             <span className="text-[10.5px] text-muted-foreground">
-              Reusable instructions you can drop into any prompt with{" "}
+              {tr("Reusable instructions you can drop into any prompt with")} {" "}
               <code className="rounded bg-muted/50 px-1 font-mono">
                 #handle
               </code>
@@ -147,8 +148,8 @@ export function AgentsSection() {
 
         {snippets.length === 0 ? (
           <div className="rounded-lg border border-dashed border-border/60 bg-card/30 px-4 py-6 text-center text-[11px] text-muted-foreground">
-            No snippets yet. Create one and insert it with{" "}
-            <code className="font-mono">#handle</code> in the AI input.
+            {tr("No snippets yet. Create one and insert it with")} {" "}
+            <code className="font-mono">#handle</code> {tr("in the AI input.")}
           </div>
         ) : (
           <ul className="flex flex-col gap-1.5">
@@ -256,7 +257,7 @@ function AgentCard({
             {agent.name}
             {agent.builtIn ? (
               <span className="rounded bg-muted/50 px-1 py-0.5 text-[9px] tracking-wide text-muted-foreground uppercase">
-                Built-in
+                {tr("Built-in")}
               </span>
             ) : null}
           </span>
@@ -279,7 +280,7 @@ function AgentCard({
                 size={10}
                 strokeWidth={2}
               />
-              Active
+              {tr("Active")}
             </>
           ) : (
             "Use agent"
@@ -561,7 +562,7 @@ function CustomInstructionsBlock({ value }: { value: string }) {
 function Label({ children }: { children: React.ReactNode }) {
   return (
     <span className="text-[11px] font-medium tracking-tight text-muted-foreground">
-      {children}
+      {translateNode(children)}
     </span>
   );
 }

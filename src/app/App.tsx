@@ -85,7 +85,6 @@ import {
   writeToSession,
 } from "@/modules/terminal";
 import { ThemeProvider, useThemeFileEditing } from "@/modules/theme";
-import { UpdaterDialog } from "@/modules/updater";
 import { useWorkspaceEnvStore, type WorkspaceEnv } from "@/modules/workspace";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import type { SearchAddon } from "@xterm/addon-search";
@@ -1300,7 +1299,6 @@ export default function App() {
             onCreated={(path) => openFileTab(path)}
           />
 
-          <UpdaterDialog />
 
           <CloseDialogs
             tabs={tabs}

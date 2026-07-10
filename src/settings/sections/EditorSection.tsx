@@ -7,6 +7,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { translateNode } from "@/modules/i18n";
 import { EXPOSED_LANGUAGES } from "@/modules/editor/lib/languageDefinitions";
 import {
   FORMATTER_LABELS,
@@ -264,7 +265,7 @@ function FormatterOverrides() {
 function Label({ children }: { children: React.ReactNode }) {
   return (
     <span className="text-[11px] font-medium tracking-tight text-muted-foreground">
-      {children}
+      {translateNode(children)}
     </span>
   );
 }

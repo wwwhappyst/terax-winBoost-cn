@@ -76,4 +76,40 @@ describe("translate", () => {
       }),
     ).toBe("启用 OpenCode Hook 失败");
   });
+
+  it("translates common settings and action labels", async () => {
+    const module = await loadI18n();
+    expect(module?.translate, "i18n module must export translate").toBeTypeOf(
+      "function",
+    );
+    if (!module?.translate) return;
+
+    const cases: Array<[string, string]> = [
+      ["General", "常规"],
+      ["Editor", "编辑器"],
+      ["Themes", "主题"],
+      ["Shortcuts", "快捷键"],
+      ["Models", "模型"],
+      ["Agents", "智能体"],
+      ["About", "关于"],
+      ["Appearance", "外观"],
+      ["Explorer", "资源管理器"],
+      ["Terminal", "终端"],
+      ["Startup", "启动"],
+      ["Notifications", "通知"],
+      ["Enable", "启用"],
+      ["Enabling", "正在启用"],
+      ["Clear", "清除"],
+      ["Close", "关闭"],
+      ["Cancel", "取消"],
+      ["Delete", "删除"],
+      ["Edit", "编辑"],
+      ["Create", "创建"],
+      ["Retry", "重试"],
+      ["Loading…", "正在加载…"],
+    ];
+    for (const [english, chinese] of cases) {
+      expect(module.translate("zh-CN", english), english).toBe(chinese);
+    }
+  });
 });

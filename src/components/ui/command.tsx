@@ -2,6 +2,7 @@ import * as React from "react"
 import { Command as CommandPrimitive } from "cmdk"
 
 import { cn } from "@/lib/utils"
+import { t, translateNode } from "@/modules/i18n"
 import {
   Dialog,
   DialogContent,
@@ -66,6 +67,7 @@ function CommandDialog({
 
 function CommandInput({
   className,
+  placeholder,
   ...props
 }: React.ComponentProps<typeof CommandPrimitive.Input>) {
   return (
@@ -77,6 +79,7 @@ function CommandInput({
             "w-full text-sm outline-hidden disabled:cursor-not-allowed disabled:opacity-50",
             className
           )}
+          placeholder={placeholder ? t(placeholder) : placeholder}
           {...props}
         />
         <InputGroupAddon>
@@ -118,6 +121,7 @@ function CommandEmpty({
 
 function CommandGroup({
   className,
+  heading,
   ...props
 }: React.ComponentProps<typeof CommandPrimitive.Group>) {
   return (
@@ -127,6 +131,7 @@ function CommandGroup({
         "overflow-hidden p-1.5 text-foreground **:[[cmdk-group-heading]]:px-3 **:[[cmdk-group-heading]]:py-2 **:[[cmdk-group-heading]]:text-xs **:[[cmdk-group-heading]]:font-medium **:[[cmdk-group-heading]]:text-muted-foreground",
         className
       )}
+      heading={typeof heading === "string" ? t(heading) : heading}
       {...props}
     />
   )
@@ -159,7 +164,7 @@ function CommandItem({
       )}
       {...props}
     >
-      {children}
+      {translateNode(children)}
       <HugeiconsIcon icon={Tick02Icon} strokeWidth={2} className="ml-auto opacity-0 group-has-data-[slot=command-shortcut]/command-item:hidden group-data-[checked=true]/command-item:opacity-100" />
     </CommandPrimitive.Item>
   )

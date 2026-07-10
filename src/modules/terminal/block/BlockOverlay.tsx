@@ -5,6 +5,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { t as tr } from "@/modules/i18n";
 import { useChatStore } from "@/modules/ai/store/chatStore";
 import {
   ArrowDown01Icon,
@@ -82,7 +83,7 @@ function relPath(p: string): string {
 function copy(text: string, message: string) {
   void navigator.clipboard
     .writeText(text)
-    .then(() => toast.success(message))
+    .then(() => toast.success(tr(message)))
     .catch(() => {});
 }
 
@@ -223,7 +224,7 @@ function BlockMenu({ block, all, onSearch }: ChromeProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button type="button" title="Block actions" className="bt-btn">
+        <button type="button" title={tr("Block actions")} className="bt-btn">
           <HugeiconsIcon
             icon={MoreHorizontalIcon}
             size={14}
@@ -345,7 +346,7 @@ function SearchBar({
       <input
         ref={inputRef}
         className="bt-search-input"
-        placeholder="Find in block"
+        placeholder={tr("Find in block")}
         onChange={(e) => run(e.target.value)}
         onKeyDown={(e) => {
           if (e.key === "Enter") {
@@ -361,12 +362,12 @@ function SearchBar({
         {matches.length ? `${idx + 1}/${matches.length}` : "0"}
       </span>
       <SearchBtn
-        title="Previous"
+        title={tr("Previous")}
         icon={ArrowUp01Icon}
         onClick={() => nav(-1)}
       />
-      <SearchBtn title="Next" icon={ArrowDown01Icon} onClick={() => nav(1)} />
-      <SearchBtn title="Close" icon={Cancel01Icon} onClick={onClose} />
+      <SearchBtn title={tr("Next")} icon={ArrowDown01Icon} onClick={() => nav(1)} />
+      <SearchBtn title={tr("Close")} icon={Cancel01Icon} onClick={onClose} />
     </div>
   );
 }

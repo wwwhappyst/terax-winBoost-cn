@@ -1,4 +1,5 @@
 import { routeAgentNotification } from "@/modules/agents/lib/route";
+import { t } from "@/modules/i18n";
 import { useWindowFocus } from "@/modules/agents/lib/useWindowFocus";
 import { useAgentStore } from "@/modules/agents/store/agentStore";
 import type { AgentStatus } from "@/modules/agents/lib/types";
@@ -62,11 +63,15 @@ export function LocalAgentNotificationsBridge() {
       });
 
     if (status === "awaiting-approval") {
-      fire("attention", "Terax needs your approval", "Approve a tool to continue");
+      fire(
+        "attention",
+        t("Terax needs your approval"),
+        t("Approve a tool to continue"),
+      );
     } else if (status === "error") {
-      fire("error", "Terax run failed", error ?? undefined);
+      fire("error", t("Terax run failed"), error ?? undefined);
     } else if (status === "idle" && isBusy(was)) {
-      fire("finished", "Terax finished", "Your task is ready");
+      fire("finished", t("Terax finished"), t("Your task is ready"));
     }
   }, [status, error]);
 

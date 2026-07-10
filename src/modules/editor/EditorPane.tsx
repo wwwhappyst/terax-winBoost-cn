@@ -1,6 +1,7 @@
 import { endpointIdFromCompatModel } from "@/modules/ai/config";
 import { getCustomEndpointKey, getKey } from "@/modules/ai/lib/keyring";
 import { lspFormatDocument, useLspExtension } from "@/modules/lsp";
+import { t } from "@/modules/i18n";
 import { usePreferencesStore } from "@/modules/settings/preferences";
 import { onKeysChanged } from "@/modules/settings/store";
 import { acceptCompletion, startCompletion } from "@codemirror/autocomplete";
@@ -189,20 +190,20 @@ export const EditorPane = memo(
           try {
             res = await lspFormatDocument(view);
           } catch (e) {
-            toast.error("Language server format failed", {
+            toast.error(t("Language server format failed"), {
               description: String(e),
             });
           }
           if (res === "unsupported" && !warnedNoFormatRef.current) {
             warnedNoFormatRef.current = true;
-            toast.warning("Format on save skipped", {
+            toast.warning(t("Format on save skipped"), {
               description:
                 "The active language server has no formatter. Pick an external one in Settings (Ruff for Python, Prettier, rustfmt, ...).",
             });
           }
         } else if (!warnedNoLspRef.current) {
           warnedNoLspRef.current = true;
-          toast.warning("Format on save skipped", {
+          toast.warning(t("Format on save skipped"), {
             description:
               "No active language server for this file. Enable one in the statusbar, or pick an external formatter in Settings.",
           });
@@ -220,7 +221,9 @@ export const EditorPane = memo(
           prefs.editorCustomFormatCommand,
         );
         if (error) {
-          toast.error(`${formatter} format failed`, { description: error });
+          toast.error(t("{name} format failed", { name: formatter }), {
+            description: error,
+          });
         } else {
           const readBack = await readFileText(pathRef.current);
           if (readBack !== null && view && view.state.doc === docAtSave) {

@@ -2,6 +2,7 @@ import * as React from "react"
 import { Select as SelectPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
+import { translateNode } from "@/modules/i18n"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { UnfoldMoreIcon, Tick02Icon, ArrowUp01Icon, ArrowDown01Icon } from "@hugeicons/core-free-icons"
 
@@ -121,7 +122,7 @@ function SelectItem({
           <HugeiconsIcon icon={Tick02Icon} strokeWidth={2} className="pointer-events-none" />
         </SelectPrimitive.ItemIndicator>
       </span>
-      <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
+      <SelectPrimitive.ItemText>{translateNode(children)}</SelectPrimitive.ItemText>
     </SelectPrimitive.Item>
   )
 }

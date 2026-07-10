@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
+import { t as tr, translateNode } from "@/modules/i18n";
 import {
   getBindingTokens,
   SHORTCUTS,
@@ -313,7 +314,9 @@ export function ModelsSection() {
   };
 
   if (!keys) {
-    return <div className="text-[12px] text-muted-foreground">Loading…</div>;
+    return (
+      <div className="text-[12px] text-muted-foreground">{tr("Loading…")}</div>
+    );
   }
 
   const configuredIds = new Set(
@@ -382,10 +385,10 @@ export function ModelsSection() {
         {visibleProviders.length === 0 && customEndpoints.length === 0 ? (
           <div className="rounded-lg border border-dashed border-border/60 bg-card/40 px-4 py-8 text-center">
             <p className="text-[12px] text-muted-foreground">
-              No providers connected yet.
+              {tr("No providers connected yet.")}
             </p>
             <p className="mt-0.5 text-[10.5px] text-muted-foreground/70">
-              Click "Add provider" to connect a cloud or local model source.
+              {tr('Click "Add provider" to connect a cloud or local model source.')}
             </p>
           </div>
         ) : (
@@ -501,7 +504,7 @@ function AddProviderMenu({
           className="flex items-center gap-2 text-[12px]"
         >
           <ProviderIcon provider="openai-compatible" size={13} />
-          <span>OpenAI Compatible</span>
+          <span>{tr("OpenAI Compatible")}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -759,7 +762,7 @@ function AutocompleteRow({
                       <span>{p.label}</span>
                       {!pConfigured ? (
                         <span className="ml-auto text-[9.5px] normal-case tracking-normal text-muted-foreground/70">
-                          not connected
+                          {tr("not connected")}
                         </span>
                       ) : null}
                     </div>
@@ -810,7 +813,7 @@ function AutocompleteRow({
       ) : null}
       {enabled && !hasKey ? (
         <p className="pl-19 text-[10.5px] text-muted-foreground">
-          {getProvider(provider).label} isn't connected — add it below.
+          {getProvider(provider).label} {tr("isn't connected — add it below.")}
         </p>
       ) : null}
     </>
@@ -885,7 +888,7 @@ function LocalProviderCard({
               size={9}
               strokeWidth={2}
             />
-            Connected
+            {tr("Connected")}
           </Badge>
         ) : null}
         <button
@@ -893,7 +896,7 @@ function LocalProviderCard({
           onClick={() => void openUrl(provider.consoleUrl)}
           className="ml-auto inline-flex items-center gap-0.5 text-[10.5px] text-muted-foreground transition-colors hover:text-foreground"
         >
-          Docs
+          {tr("Docs")}
           <HugeiconsIcon
             icon={ArrowUpRight01Icon}
             size={11}
@@ -973,7 +976,7 @@ function LocalProviderCard({
                 className="h-8 w-28 font-mono text-[11.5px]"
               />
               <span className="text-[10.5px] text-muted-foreground">
-                tokens
+                {tr("tokens")}
               </span>
             </div>
           </FieldRow>
@@ -1032,7 +1035,7 @@ function LocalProviderCard({
 
         {!modelId.trim() && meta.modelHint ? (
           <p className="text-[10.5px] leading-relaxed text-muted-foreground">
-            {meta.modelHint}
+            {translateNode(meta.modelHint)}
           </p>
         ) : null}
       </div>
@@ -1122,7 +1125,7 @@ function CustomEndpointCard({
               size={9}
               strokeWidth={2}
             />
-            Connected
+            {tr("Connected")}
           </Badge>
         ) : null}
         <Button
@@ -1210,7 +1213,7 @@ function CustomEndpointCard({
                 className="h-8 w-28 font-mono text-[11.5px]"
               />
               <span className="text-[10.5px] text-muted-foreground">
-                tokens
+                {tr("tokens")}
               </span>
             </div>
           </FieldRow>
@@ -1279,7 +1282,7 @@ function FieldRow({
   return (
     <div className="flex items-center gap-3">
       <span className="w-16 shrink-0 text-[11px] tracking-tight text-muted-foreground">
-        {label}
+        {translateNode(label)}
       </span>
       <div className="flex flex-1 items-center">{children}</div>
     </div>
@@ -1294,20 +1297,22 @@ function StatusLine({
   if (status === "idle") return null;
   if (status === "testing") {
     return (
-      <span className="text-[10.5px] text-muted-foreground">Testing…</span>
+      <span className="text-[10.5px] text-muted-foreground">
+        {tr("Testing…")}
+      </span>
     );
   }
   if (status === "ok") {
     return (
       <span className="flex items-center gap-1 text-[10.5px] text-muted-foreground">
         <HugeiconsIcon icon={CheckmarkCircle02Icon} size={11} strokeWidth={2} />
-        Reachable — server responded.
+        {tr("Reachable — server responded.")}
       </span>
     );
   }
   return (
     <span className="text-[10.5px] text-destructive/80">
-      Could not reach the server.
+      {tr("Could not reach the server.")}
     </span>
   );
 }
@@ -1326,7 +1331,7 @@ function VoiceBlock() {
     <div className="flex flex-col gap-3 rounded-lg border border-border/60 bg-card/60 px-3 py-2.5">
       <div className="flex items-center gap-2">
         <HugeiconsIcon icon={Mic01Icon} size={15} strokeWidth={1.5} />
-        <span className="text-[12.5px] font-medium">Voice input</span>
+        <span className="text-[12.5px] font-medium">{tr("Voice input")}</span>
       </div>
 
       <FieldRow label="Provider">
@@ -1413,7 +1418,7 @@ function VoiceBlock() {
 function Label({ children }: { children: React.ReactNode }) {
   return (
     <span className="text-[11px] font-medium tracking-tight text-muted-foreground">
-      {children}
+      {translateNode(children)}
     </span>
   );
 }
