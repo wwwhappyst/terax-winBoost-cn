@@ -1,4 +1,5 @@
 use serde_json::{json, Value};
+use crate::modules::fs::file::write_atomic;
 
 // How a given agent's hook delivers our OSC 777 marker into the terminal.
 #[derive(Clone, Copy)]
@@ -9,6 +10,7 @@ enum Delivery {
     // Codex/Gemini hooks can't write to the terminal, so the hook command emits
     // the marker itself: to /dev/tty on Unix, via a CONOUT$ helper on Windows.
     Osc,
+    Plugin,
 }
 
 struct AgentSpec {
@@ -57,6 +59,26 @@ const AGENTS: &[AgentSpec] = &[
         matcher: true,
         delivery: Delivery::Osc,
     },
+    AgentSpec {
+        agent: "grok",
+        dir: ".grok/hooks",
+        file: "terax.json",
+        events: &[
+            ("UserPromptSubmit", "working"),
+            ("Notification", "attention"),
+            ("Stop", "finished"),
+        ],
+        matcher: false,
+        delivery: Delivery::Osc,
+    },
+    AgentSpec {
+        agent: "opencode",
+        dir: ".config/opencode/plugins",
+        file: "terax-agent-notifications.js",
+        events: &[],
+        matcher: false,
+        delivery: Delivery::Plugin,
+    },
 ];
 
 // Substrings identifying a hook command as ours, across every form we've ever
@@ -64,6 +86,38 @@ const AGENTS: &[AgentSpec] = &[
 // helper). Used to prune our own groups before reinserting so installs are
 // idempotent and migrate older markers.
 const OWNED_MARKERS: [&str; 3] = ["notify;Terax;", "terax;notify", "__terax_notify"];
+
+/// 返回 Terax 管理的 OpenCode 全局通知插件源码。
+fn opencode_plugin_source() -> &'static str {
+    r#"const TERAX_OWNER = "Managed by Terax: agent notifications"
+const emit = (event) => {
+  if (process.env.TERAX_TERMINAL !== "1") return
+  const marker = event === "attention"
+    ? "\u001b]777;notify;Terax;opencode;attention\u0007"
+    : "\u001b]777;notify;Terax;opencode;finished\u0007"
+  process.stdout.write(marker)
+}
+
+export const TeraxAgentNotifications = async () => ({
+  event: async ({ event }) => {
+    if (event.type === "permission.asked") emit("attention")
+    if (event.type === "session.idle") emit("finished")
+  },
+})
+"#
+}
+
+/// 判断 OpenCode 插件文件是否可由 Terax 安全创建或更新。
+fn can_write_opencode_plugin(existing: Option<&str>) -> bool {
+    existing.is_none_or(|text| text.contains("Managed by Terax: agent notifications"))
+}
+
+/// 判断 OpenCode 插件是否包含 Terax 管理的完整完成通知逻辑。
+fn opencode_plugin_installed(contents: &str) -> bool {
+    contents.contains("Managed by Terax: agent notifications")
+        && contents.contains("session.idle")
+        && contents.contains("opencode;finished")
+}
 
 fn find(agent: &str) -> Result<&'static AgentSpec, String> {
     AGENTS
@@ -78,6 +132,7 @@ fn hook_command(spec: &AgentSpec, event: &str) -> String {
             r#"[ -n "$TERAX_TERMINAL" ] && printf '{{"terminalSequence":"\\u001b]777;notify;Terax;{event}\\u0007"}}' || true"#
         ),
         Delivery::Osc => osc_command(spec.agent, event),
+        Delivery::Plugin => unreachable!("OpenCode plugin does not use JSON hook commands"),
     }
 }
 
@@ -109,9 +164,10 @@ fn status_needle(spec: &AgentSpec, event: &str) -> String {
             }
             #[cfg(windows)]
             {
-                format!("__terax_notify {} {event}", spec.agent)
+                hook_command(spec, event)
             }
         }
+        Delivery::Plugin => String::new(),
     }
 }
 
@@ -189,6 +245,23 @@ pub fn agent_enable_hooks(agent: String) -> Result<(), String> {
     let dir = path.parent().unwrap();
     std::fs::create_dir_all(dir).map_err(|e| format!("create {}: {e}", dir.display()))?;
 
+    if matches!(spec.delivery, Delivery::Plugin) {
+        let existing = match std::fs::read_to_string(&path) {
+            Ok(contents) => Some(contents),
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => None,
+            Err(e) => return Err(format!("read {}: {e}", path.display())),
+        };
+        if !can_write_opencode_plugin(existing.as_deref()) {
+            return Err(format!(
+                "{} is not managed by Terax; refusing to overwrite",
+                path.display()
+            ));
+        }
+        write_atomic(&path, opencode_plugin_source().as_bytes())
+            .map_err(|e| format!("write {}: {e}", path.display()))?;
+        return Ok(());
+    }
+
     let existing = match std::fs::read_to_string(&path) {
         Ok(s) => existing_config(Some(&s), &path)?,
         Err(e) if e.kind() == std::io::ErrorKind::NotFound => json!({}),
@@ -198,14 +271,7 @@ pub fn agent_enable_hooks(agent: String) -> Result<(), String> {
     let merged = merge_hooks(existing, spec);
     let out = serde_json::to_string_pretty(&merged).map_err(|e| e.to_string())?;
 
-    // Write to a sibling temp file then rename so a crash mid-write can't leave
-    // a truncated config.
-    let tmp = path.with_extension("terax-tmp");
-    std::fs::write(&tmp, out).map_err(|e| format!("write {}: {e}", tmp.display()))?;
-    std::fs::rename(&tmp, &path).map_err(|e| {
-        let _ = std::fs::remove_file(&tmp);
-        format!("rename into {}: {e}", path.display())
-    })?;
+    write_atomic(&path, out.as_bytes()).map_err(|e| format!("write {}: {e}", path.display()))?;
     Ok(())
 }
 
@@ -250,6 +316,9 @@ pub fn agent_hooks_status(agent: String) -> bool {
     else {
         return false;
     };
+    if matches!(spec.delivery, Delivery::Plugin) {
+        return opencode_plugin_installed(&content);
+    }
     spec.events
         .iter()
         .all(|(_, m)| content.contains(&status_needle(spec, m)))
@@ -403,10 +472,55 @@ mod tests {
     }
 
     #[test]
-    fn registers_grok_and_opencode_agents() {
-        // 通知安装入口必须认识两个新增 CLI，未知名称仍由 find 拒绝。
+    fn registers_grok_agent() {
+        // Grok 使用与现有 JSON Hook 相同的安装入口。
         assert!(find("grok").is_ok());
+    }
+
+    #[test]
+    fn registers_opencode_agent() {
+        // OpenCode 虽使用插件文件，也必须由统一安装入口识别。
         assert!(find("opencode").is_ok());
+    }
+
+    #[test]
+    fn opencode_plugin_emits_attention_and_finished_markers() {
+        let source = opencode_plugin_source();
+        assert!(source.contains("Managed by Terax: agent notifications"));
+        assert!(source.contains("permission.asked"));
+        assert!(source.contains("opencode;attention"));
+        assert!(source.contains("session.idle"));
+        assert!(source.contains("opencode;finished"));
+        assert!(source.contains("TERAX_TERMINAL"));
+    }
+
+    #[test]
+    fn opencode_plugin_refuses_foreign_file() {
+        assert!(can_write_opencode_plugin(None));
+        assert!(can_write_opencode_plugin(Some(opencode_plugin_source())));
+        assert!(!can_write_opencode_plugin(Some(
+            "export const UserPlugin = () => ({})",
+        )));
+    }
+
+    #[test]
+    fn opencode_plugin_status_requires_owned_finished_hook() {
+        assert!(opencode_plugin_installed(opencode_plugin_source()));
+        assert!(!opencode_plugin_installed(
+            "export const UserPlugin = () => ({})",
+        ));
+        assert!(!opencode_plugin_installed(
+            "Managed by Terax: agent notifications session.idle",
+        ));
+    }
+
+    #[test]
+    fn grok_adds_working_attention_and_finished_hooks() {
+        let out = merge_hooks(json!({}), spec("grok"));
+        assert_eq!(hook_count(&out, "UserPromptSubmit"), 1);
+        assert_eq!(hook_count(&out, "Notification"), 1);
+        assert_eq!(hook_count(&out, "Stop"), 1);
+        assert!(command(&out, "Stop", 0).contains("__terax_notify grok finished"));
     }
 
     #[cfg(windows)]
