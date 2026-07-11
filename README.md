@@ -1,17 +1,8 @@
-<div align="center">
-  <img src="public/logo.png" width="144" height="144" alt="Terax" />
-  <h1>Terax Windows 改造版</h1>
+# Terax Windows 增强汉化版
 
-  <p>基于 Terax 上游项目的个人 Windows 改造版本。</p>
+基于 Terax 上游项目的个人 Windows 改造版本。
 
-  <p>
-    <a href="https://github.com/wwwhappyst/terax-ai/releases">下载 Releases</a>
-    ·
-    <a href="https://github.com/crynta/terax-ai">上游仓库</a>
-    ·
-    <a href="https://github.com/wwwhappyst/terax-ai">本 Fork 仓库</a>
-  </p>
-</div>
+[下载 Releases](https://github.com/wwwhappyst/terax-ai/releases) · [上游仓库](https://github.com/crynta/terax-ai) · [本 Fork 仓库](https://github.com/wwwhappyst/terax-ai)
 
 ---
 
@@ -37,6 +28,8 @@ Terax 是一个基于 Tauri 2、Rust 和 React 19 的 AI 原生终端工作区�
 - Windows x64：`Terax_*_x64-setup.exe`
 - Apple Silicon macOS：`Terax_*_aarch64.dmg`
 
+
+
 ### Windows
 
 首次运行时，如果 Windows Defender SmartScreen 提示“Windows 已保护你的电脑”，请点击“更多信息”，再点击“仍要运行”。这是因为个人构建没有使用正式代码签名证书。
@@ -53,7 +46,7 @@ xattr -dr com.apple.quarantine "/Applications/Terax.app"
 
 ## 上游同步
 
-作者上游仓库：<https://github.com/crynta/terax-ai>
+作者上游仓库：[https://github.com/crynta/terax-ai](https://github.com/crynta/terax-ai)
 
 同步流程如下：
 
@@ -66,6 +59,8 @@ xattr -dr com.apple.quarantine "/Applications/Terax.app"
 
 ## 从源码运行
 
+
+
 ### 环境要求
 
 - Windows PowerShell 7；
@@ -74,12 +69,16 @@ xattr -dr com.apple.quarantine "/Applications/Terax.app"
 - Rust stable-msvc 工具链；
 - Tauri 2 所需的系统依赖。
 
+
+
 ### 开发运行
 
 ```powershell
 pnpm install --frozen-lockfile
 pnpm tauri dev
 ```
+
+
 
 ### 检查
 
@@ -97,6 +96,8 @@ cargo clippy --all-targets --locked -- -D warnings
 cargo test --locked
 ```
 
+
+
 ## 构建说明
 
 个人 Release 按上游 GitHub Actions 的平台构建方式生成：
@@ -105,7 +106,7 @@ cargo test --locked
 - Apple Silicon macOS 使用 macOS 构建机生成 `aarch64.dmg`；
 - Windows 本机不能原生生成 Apple Silicon macOS 安装包。
 
-详细命令见 [`docs/exec_mode.md`](docs/exec_mode.md)。
+详细命令见 `[docs/exec_mode.md](docs/exec_mode.md)`。
 
 ## 许可证
 
