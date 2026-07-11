@@ -498,6 +498,11 @@ export const ZH_CN: Record<string, string> = {
   Todos: "待办事项",
   "Ask Terax anything": "向 Terax 提问",
   "Something went wrong.": "出现错误。",
+  "Upstream update available": "上游有可用更新",
+  "Upstream Terax v{version} is available": "上游 Terax v{version} 已发布",
+  "This Windows edition does not install upstream packages directly. Sync your Fork, update main, then merge it into the Windows branch.":
+    "此 Windows 改版不会直接安装上游软件包。请同步 Fork、更新 main，再合并到 Windows 分支。",
+  "View upstream release": "查看上游发布页",
   Read: "读取",
   "Open AI log": "打开 AI 日志",
   "General-purpose coding assistant. Writes, edits, and runs.":

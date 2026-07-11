@@ -4,6 +4,7 @@ import { IS_MAC, USE_CUSTOM_WINDOW_CONTROLS } from "@/lib/platform";
 import { NotificationBell } from "@/modules/agents";
 import type { Tab } from "@/modules/tabs";
 import { TabBar } from "@/modules/tabs";
+import { UpdaterDialog } from "@/modules/updater";
 import {
   CommandIcon,
   Settings01Icon,
@@ -177,11 +178,13 @@ export function Header({
             onActivate={onActivateAgent}
             onActivateLocal={onActivateLocalAgent}
           />
+          <UpdaterDialog />
           {settingsButton}
         </>
       )}
 
       {!IS_MAC && settingsButton}
+      {!IS_MAC && <UpdaterDialog />}
 
       {USE_CUSTOM_WINDOW_CONTROLS && (
         <>
