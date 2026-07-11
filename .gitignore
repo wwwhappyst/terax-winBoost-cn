@@ -26,3 +26,7 @@ stats.html
 *.sw?
 
 *.tsbuildinfo
+
+# 本地维护文档，不纳入个人 Fork
+docs/envs.md
+docs/exec_mode.md
