@@ -7,6 +7,7 @@ import ReactDOM from "react-dom/client";
 import App from "./app/App";
 import { initLaunchDir } from "./lib/launchDir";
 import { USE_CUSTOM_WINDOW_CONTROLS } from "./lib/platform";
+import { usePreferencesStore } from "./modules/settings/preferences";
 
 if (USE_CUSTOM_WINDOW_CONTROLS) {
   document.documentElement.dataset.chrome = "borderless";
@@ -24,6 +25,8 @@ await invoke("pty_close_all").catch(() => {});
 
 // Seed before first paint so default tab mounts at target cwd (no flicker).
 await initLaunchDir();
+// 在首帧前读取语言，避免命令式翻译键先以英文渲染。
+await usePreferencesStore.getState().init();
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <App />,

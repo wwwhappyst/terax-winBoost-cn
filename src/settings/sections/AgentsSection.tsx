@@ -262,7 +262,7 @@ function AgentCard({
             ) : null}
           </span>
           <span className="line-clamp-2 text-[10.5px] leading-relaxed text-muted-foreground">
-            {agent.description}
+            {tr(agent.description)}
           </span>
         </div>
       </div>
@@ -283,7 +283,7 @@ function AgentCard({
               {tr("Active")}
             </>
           ) : (
-            "Use agent"
+            tr("Use agent")
           )}
         </Button>
         <div className="flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">

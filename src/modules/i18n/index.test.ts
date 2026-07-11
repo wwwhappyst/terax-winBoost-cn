@@ -112,4 +112,27 @@ describe("translate", () => {
       expect(module.translate("zh-CN", english), english).toBe(chinese);
     }
   });
+
+  it("translates built-in agent descriptions and source-control guidance", async () => {
+    const module = await loadI18n();
+    expect(module?.translate, "i18n module must export translate").toBeTypeOf(
+      "function",
+    );
+    if (!module?.translate) return;
+
+    expect(
+      module.translate(
+        "zh-CN",
+        "General-purpose coding assistant. Writes, edits, and runs.",
+      ),
+    ).toBe("通用编程助手，可编写、编辑和运行代码。");
+    expect(
+      module.translate(
+        "zh-CN",
+        "The active workspace is not inside a Git repository.",
+      ),
+    ).toBe("当前工作区不在 Git 仓库中。");
+    expect(module.translate("zh-CN", "Use agent")).toBe("使用智能体");
+    expect(module.translate("zh-CN", "AI chat")).toBe("智能体对话");
+  });
 });

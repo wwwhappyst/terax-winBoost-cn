@@ -99,7 +99,7 @@ export function AgentSwitcher({ isMiniWindow }: { isMiniWindow?: boolean }) {
               <span className="flex min-w-0 flex-1 flex-col">
                 <span>{a.name}</span>
                 <span className="line-clamp-1 text-[10.5px] text-muted-foreground">
-                  {a.description}
+                  {tr(a.description)}
                 </span>
               </span>
               {a.id === activeId ? (
@@ -140,7 +140,7 @@ export function AgentSwitcher({ isMiniWindow }: { isMiniWindow?: boolean }) {
                     <span className="truncate">{a.name}</span>
                     {a.description ? (
                       <span className="line-clamp-1 text-[10.5px] text-muted-foreground">
-                        {a.description}
+                        {tr(a.description)}
                       </span>
                     ) : null}
                   </span>

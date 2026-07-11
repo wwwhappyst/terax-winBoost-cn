@@ -749,7 +749,7 @@ export const SourceControlPanel = memo(function SourceControlPanel({
         {scm.panelState === "no-repo" ? (
           <PanelCenter
             title="No repository"
-            body="The active workspace is not inside a Git repository."
+            body={tr("The active workspace is not inside a Git repository.")}
           />
         ) : null}
 

@@ -5,6 +5,9 @@ export const ZH_CN: Record<string, string> = {
   "Interface language": "界面语言",
   "Choose the language used by the Terax interface.":
     "选择 Terax 界面使用的语言。",
+  "Restart Terax?": "重启 Terax？",
+  "Restart Terax to apply the selected interface language.":
+    "需要重启 Terax 才能应用所选界面语言。",
   "Failed to enable {agent} hooks": "启用 {agent} Hook 失败",
   General: "常规",
   Editor: "编辑器",
@@ -42,6 +45,8 @@ export const ZH_CN: Record<string, string> = {
   Dark: "深色",
   Zoom: "缩放",
   "UI zoom level": "界面缩放比例",
+  "AI chat zoom level": "智能体对话缩放比例",
+  "AI chat": "智能体对话",
   "For theme, background and customization, see the Themes tab.":
     "主题、背景和个性化设置请前往“主题”页面。",
   "Show hidden files": "显示隐藏文件",
@@ -472,6 +477,8 @@ export const ZH_CN: Record<string, string> = {
   "Commit Graph": "提交图",
   "Loading repository": "正在加载仓库",
   "No repository": "未检测到仓库",
+  "The active workspace is not inside a Git repository.":
+    "当前工作区不在 Git 仓库中。",
   "Source control error": "源代码管理错误",
   "Commit message": "提交信息",
   "to commit": "提交",
@@ -493,6 +500,14 @@ export const ZH_CN: Record<string, string> = {
   "Something went wrong.": "出现错误。",
   Read: "读取",
   "Open AI log": "打开 AI 日志",
+  "General-purpose coding assistant. Writes, edits, and runs.":
+    "通用编程助手，可编写、编辑和运行代码。",
+  "Use agent": "使用智能体",
+  "Design and tradeoffs. Plans before code.": "负责设计与权衡，先规划再编码。",
+  "Reviews diffs for correctness, perf, security.":
+    "审查代码差异的正确性、性能和安全性。",
+  "Threat-models changes and flags vulns.": "分析变更威胁模型并标记漏洞。",
+  "UI/UX critique and refinement.": "评审并优化界面与交互体验。",
   "Plan mode": "计划模式",
   Model: "模型",
   "Of which cached": "其中已缓存",

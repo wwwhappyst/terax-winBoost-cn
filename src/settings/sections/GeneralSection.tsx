@@ -5,6 +5,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -24,6 +34,9 @@ import { usePreferencesStore } from "@/modules/settings/preferences";
 import type { ThemePref } from "@/modules/settings/store";
 import {
   setAgentNotifications,
+  AI_MINI_ZOOM_MAX,
+  AI_MINI_ZOOM_MIN,
+  setAiMiniZoom,
   setAutostart,
   setDefaultWorkspaceEnv,
   setExplorerGitDecorations,
@@ -39,6 +52,7 @@ import {
   setTerminalShell,
   setTerminalWebglEnabled,
   setZoomLevel,
+  shouldRestartForLanguageChange,
   TERMINAL_FONT_SIZES,
   TERMINAL_SCROLLBACK_PRESETS,
 } from "@/modules/settings/store";
@@ -51,6 +65,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import { invoke } from "@tauri-apps/api/core";
 import { disable, enable, isEnabled } from "@tauri-apps/plugin-autostart";
+import { relaunch } from "@tauri-apps/plugin-process";
 import { useEffect, useState } from "react";
 import { SectionHeader } from "../components/SectionHeader";
 import { SettingRow } from "../components/SettingRow";
@@ -106,7 +121,11 @@ export function GeneralSection() {
   const terminalFontSize = usePreferencesStore((s) => s.terminalFontSize);
   const terminalScrollback = usePreferencesStore((s) => s.terminalScrollback);
   const zoomLevel = usePreferencesStore((s) => s.zoomLevel);
+  const aiMiniZoom = usePreferencesStore((s) => s.aiMiniZoom);
   const agentNotifications = usePreferencesStore((s) => s.agentNotifications);
+  const [pendingLanguage, setPendingLanguage] = useState<AppLanguage | null>(
+    null,
+  );
 
   useEffect(() => {
     let alive = true;
@@ -142,6 +161,12 @@ export function GeneralSection() {
     }
   };
 
+  const applyLanguageChange = async () => {
+    if (!pendingLanguage) return;
+    await setLanguage(pendingLanguage);
+    await relaunch();
+  };
+
   return (
     <div className="flex flex-col gap-6">
       <SectionHeader
@@ -155,7 +180,12 @@ export function GeneralSection() {
       >
         <Select
           value={language}
-          onValueChange={(value) => void setLanguage(value as AppLanguage)}
+          onValueChange={(value) => {
+            const next = value as AppLanguage;
+            if (shouldRestartForLanguageChange(language, next)) {
+              setPendingLanguage(next);
+            }
+          }}
         >
           <SelectTrigger
             value={language}
@@ -170,6 +200,26 @@ export function GeneralSection() {
           </SelectContent>
         </Select>
       </SettingRow>
+
+      <AlertDialog
+        open={pendingLanguage !== null}
+        onOpenChange={(open) => !open && setPendingLanguage(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Restart Terax?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Restart Terax to apply the selected interface language.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => void applyLanguageChange()}>
+              Restart
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <div className="flex flex-col gap-2">
         <Label>Appearance</Label>
@@ -213,6 +263,27 @@ export function GeneralSection() {
             max={ZOOM_MAX}
             step={ZOOM_STEP}
             onValueChange={(v) => void setZoomLevel(v[0] ?? 1)}
+          />
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Label>AI chat</Label>
+        <div className="flex flex-col gap-3 rounded-lg border border-border/60 p-3">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-[11.5px] text-muted-foreground">
+              {tr("AI chat zoom level")}
+            </span>
+            <span className="tabular-nums text-[11px] text-muted-foreground">
+              {Math.round(aiMiniZoom * 100)}%
+            </span>
+          </div>
+          <Slider
+            value={[aiMiniZoom]}
+            min={AI_MINI_ZOOM_MIN}
+            max={AI_MINI_ZOOM_MAX}
+            step={ZOOM_STEP}
+            onValueChange={(v) => void setAiMiniZoom(v[0] ?? 1)}
           />
         </div>
       </div>

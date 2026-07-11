@@ -17,9 +17,12 @@ Terax 是基于 Tauri 2、Rust、React 19 和 TypeScript 的桌面终端应用�
 
 ## 文档入口
 
-- `TERAX.md`：架构与项目约定的来源。
+- `TERAX.md`：架构与项目约定的来源（中文译本：`TERAX.zh-CN.md`）。
+- `README.md`：项目介绍（中文译本：`README.zh-CN.md`）。
+- `CONTRIBUTING.md`、`ROADMAP.md`、`SECURITY.md`、`CODE_OF_CONDUCT.md`：均有对应 `*.zh-CN.md` 中文译本。
 - `docs/envs.md`：Windows 环境要求、安装方式和本机核验。
 - `docs/exec_mode.md`：依赖安装、开发、检查和打包命令。
-- `docs/architecture/`：子系统架构说明。
+- `docs/handoff.md`：Windows 改造的当前接力状态、核验命令和维护边界。
+- `docs/architecture/`：子系统架构说明（英文）。
 
 `AGENTS.md` 只记录长期规则、项目简介和文档入口，不记录单次进度或验证结果。

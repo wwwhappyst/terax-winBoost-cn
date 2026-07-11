@@ -10,13 +10,13 @@ pnpm install --frozen-lockfile
 
 ## 开发运行
 
-```powershell
+```shell
 pnpm tauri dev
 ```
 
 ## 检查
 
-```powershell
+```shell
 pnpm lint
 pnpm check-types
 pnpm test
@@ -34,8 +34,17 @@ cargo nextest run --locked
 
 ## 生产打包
 
-```powershell
+```shell
 pnpm tauri build
 ```
 
 Windows 安装包输出到 `src-tauri/target/release/bundle/`。
+
+## windows本地调试
+
+```shell
+Set-Location D:\dev_source_code\Terax_winpp
+$env:CARGO_HOME = 'D:\dev_tools\cargo'
+$env:RUSTUP_HOME = 'D:\dev_tools\rustup'
+pnpm tauri dev
+```

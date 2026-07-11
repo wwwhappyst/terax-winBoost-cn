@@ -69,6 +69,7 @@ export function AiMiniWindow({ state }: { state: PresenceState }) {
   const closeMini = useChatStore((s) => s.closeMini);
   const sessionId = useChatStore((s) => s.activeSessionId);
   const openPanel = useChatStore((s) => s.openPanel);
+  const aiMiniZoom = usePreferencesStore((s) => s.aiMiniZoom);
   const expandToPanel = () => {
     closeMini();
     openPanel();
@@ -94,6 +95,7 @@ export function AiMiniWindow({ state }: { state: PresenceState }) {
       ref={ref}
       data-state={state}
       data-ai-mini-window
+      style={{ zoom: aiMiniZoom }}
       className={cn(
         "no-scrollbar-deep fixed z-40 flex flex-col overflow-hidden",
         "rounded-2xl border border-border/60 bg-card text-[12px]",

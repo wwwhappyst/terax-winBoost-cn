@@ -159,6 +159,7 @@ export type Preferences = {
   terminalScrollback: number;
   lastWslDistro: string | null;
   zoomLevel: number;
+  aiMiniZoom: number;
   agentNotifications: boolean;
   defaultWorkspaceEnv: string;
   shortcuts: Record<ShortcutId, KeyBinding[]>;
@@ -248,6 +249,7 @@ const KEY_TERMINAL_FONT_SIZE = "terminalFontSize";
 const KEY_TERMINAL_SCROLLBACK = "terminalScrollback";
 const KEY_LAST_WSL_DISTRO = "lastWslDistro";
 const KEY_ZOOM_LEVEL = "zoomLevel";
+const KEY_AI_MINI_ZOOM = "aiMiniZoom";
 const KEY_AGENT_NOTIFICATIONS = "agentNotifications";
 const KEY_DEFAULT_WORKSPACE_ENV = "defaultWorkspaceEnv";
 const KEY_SHORTCUTS = "shortcuts";
@@ -274,6 +276,9 @@ export const TERMINAL_SCROLLBACK_MAX = 50_000;
 export const TERMINAL_SCROLLBACK_PRESETS = [
   500, 1000, 2000, 5000, 10_000, 25_000,
 ] as const;
+
+export const AI_MINI_ZOOM_MIN = 0.5;
+export const AI_MINI_ZOOM_MAX = 2;
 
 export const DEFAULT_PREFERENCES: Preferences = {
   language: "en",
@@ -322,6 +327,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   terminalScrollback: TERMINAL_SCROLLBACK_DEFAULT,
   lastWslDistro: null,
   zoomLevel: 1.0,
+  aiMiniZoom: 1.0,
   agentNotifications: true,
   defaultWorkspaceEnv: "local",
   shortcuts: {} as Record<ShortcutId, KeyBinding[]>,
@@ -485,6 +491,9 @@ export async function loadPreferences(): Promise<Preferences> {
       get<string | null>(KEY_LAST_WSL_DISTRO) ??
       DEFAULT_PREFERENCES.lastWslDistro,
     zoomLevel: get<number>(KEY_ZOOM_LEVEL) ?? DEFAULT_PREFERENCES.zoomLevel,
+    aiMiniZoom: coerceAiMiniZoom(
+      get<number>(KEY_AI_MINI_ZOOM) ?? DEFAULT_PREFERENCES.aiMiniZoom,
+    ),
     agentNotifications:
       get<boolean>(KEY_AGENT_NOTIFICATIONS) ??
       DEFAULT_PREFERENCES.agentNotifications,
@@ -547,6 +556,20 @@ export async function setTheme(value: ThemePref): Promise<void> {
 /** 将持久化值限制为当前支持的界面语言。 */
 export function coerceAppLanguage(value: unknown): AppLanguage {
   return value === "zh-CN" ? "zh-CN" : "en";
+}
+
+/** 仅在语言真正改变时请求重启，避免重复选择当前语言打断工作。 */
+export function shouldRestartForLanguageChange(
+  current: AppLanguage,
+  next: AppLanguage,
+): boolean {
+  return current !== next;
+}
+
+/** 限制智能体浮窗缩放，避免异常持久化值让对话不可用。 */
+export function coerceAiMiniZoom(value: unknown): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) return 1;
+  return Math.min(AI_MINI_ZOOM_MAX, Math.max(AI_MINI_ZOOM_MIN, value));
 }
 
 /** 持久化界面语言，并通知其他窗口同步。 */
@@ -781,6 +804,11 @@ export async function setZoomLevel(value: number): Promise<void> {
   await writePref(KEY_ZOOM_LEVEL, value);
 }
 
+/** 持久化智能体浮窗缩放，并在当前窗口立即应用。 */
+export async function setAiMiniZoom(value: number): Promise<void> {
+  await writePref(KEY_AI_MINI_ZOOM, coerceAiMiniZoom(value));
+}
+
 export const AUTO_SAVE_DELAY_MIN = 100;
 export const AUTO_SAVE_DELAY_MAX = 60000;
 
@@ -893,6 +921,7 @@ export async function onPreferencesChange(
     [KEY_TERMINAL_SCROLLBACK]: "terminalScrollback",
     [KEY_LAST_WSL_DISTRO]: "lastWslDistro",
     [KEY_ZOOM_LEVEL]: "zoomLevel",
+    [KEY_AI_MINI_ZOOM]: "aiMiniZoom",
     [KEY_AGENT_NOTIFICATIONS]: "agentNotifications",
     [KEY_DEFAULT_WORKSPACE_ENV]: "defaultWorkspaceEnv",
     [KEY_SHORTCUTS]: "shortcuts",

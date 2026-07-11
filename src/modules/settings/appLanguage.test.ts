@@ -19,4 +19,23 @@ describe("coerceAppLanguage", () => {
     expect(coerce("zh-TW")).toBe("en");
     expect(coerce(null)).toBe("en");
   });
+
+  it("only requests a restart when the selected language changes", () => {
+    const shouldRestart = (
+      store as unknown as {
+        shouldRestartForLanguageChange?: (
+          current: "en" | "zh-CN",
+          next: "en" | "zh-CN",
+        ) => boolean;
+      }
+    ).shouldRestartForLanguageChange;
+    expect(shouldRestart, "store must export language restart decision").toBeTypeOf(
+      "function",
+    );
+    if (!shouldRestart) return;
+
+    expect(shouldRestart("en", "zh-CN")).toBe(true);
+    expect(shouldRestart("zh-CN", "en")).toBe(true);
+    expect(shouldRestart("zh-CN", "zh-CN")).toBe(false);
+  });
 });

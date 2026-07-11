@@ -37,6 +37,7 @@ import {
 } from "./lib/contextActions";
 import { fileIconUrl, folderIconUrl } from "./lib/iconResolver";
 import { COMPACT_CONTENT, COMPACT_ITEM } from "./lib/menuItemClass";
+import { isExplorerRenameShortcut } from "./lib/renameShortcut";
 import { useExplorerDnd } from "./lib/useExplorerDnd";
 import { useExplorerFileDrop } from "./lib/useExplorerFileDrop";
 import { useFileTree } from "./lib/useFileTree";
@@ -390,6 +391,12 @@ export const FileExplorer = memo(
         setSelectedPath(path);
         requestAnimationFrame(() => scrollEntryIntoView(path));
       };
+
+      if (isExplorerRenameShortcut(e) && currentIdx >= 0) {
+        e.preventDefault();
+        tree.beginRename(entryPaths[currentIdx]);
+        return;
+      }
 
       switch (e.key) {
         case "ArrowDown":
