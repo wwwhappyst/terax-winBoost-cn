@@ -24,5 +24,6 @@ Terax 是基于 Tauri 2、Rust、React 19 和 TypeScript 的桌面终端应用�
 - `docs/exec_mode.md`：依赖安装、开发、检查和打包命令。
 - `docs/handoff.md`：Windows 改造的当前接力状态、核验命令和维护边界。
 - `docs/architecture/`：子系统架构说明（英文）。
+- `docs/spec.md`：规格约束文档。
 
 `AGENTS.md` 只记录长期规则、项目简介和文档入口，不记录单次进度或验证结果。
