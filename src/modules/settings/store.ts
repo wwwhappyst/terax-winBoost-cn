@@ -122,6 +122,7 @@ export type Preferences = {
   backgroundBlur: number;
   defaultModelId: ModelId;
   editorTheme: EditorThemePref;
+  editorFontSize: number;
   customInstructions: string;
   autostart: boolean;
   restoreWindowState: boolean;
@@ -209,6 +210,7 @@ const KEY_BG_OPACITY = "backgroundOpacity";
 const KEY_BG_BLUR = "backgroundBlur";
 const KEY_DEFAULT_MODEL = "defaultModelId";
 const KEY_EDITOR_THEME = "editorTheme";
+const KEY_EDITOR_FONT_SIZE = "editorFontSize";
 const KEY_CUSTOM_INSTRUCTIONS = "customInstructions";
 const KEY_AUTOSTART = "autostart";
 const KEY_RESTORE_WINDOW = "restoreWindowState";
@@ -270,6 +272,13 @@ export const TERMINAL_FONT_SIZES = [
   10, 12, 13, 14, 15, 16, 18, 20, 22, 24,
 ] as const;
 
+export const EDITOR_FONT_SIZE_DEFAULT = 13;
+export const EDITOR_FONT_SIZE_MIN = 8;
+export const EDITOR_FONT_SIZE_MAX = 32;
+export const EDITOR_FONT_SIZES = [
+  10, 11, 12, 13, 14, 15, 16, 18, 20, 22, 24,
+] as const;
+
 export const TERMINAL_SCROLLBACK_DEFAULT = 2000;
 export const TERMINAL_SCROLLBACK_MIN = 200;
 export const TERMINAL_SCROLLBACK_MAX = 50_000;
@@ -290,6 +299,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   backgroundBlur: 0,
   defaultModelId: DEFAULT_MODEL_ID,
   editorTheme: EDITOR_THEME_AUTO,
+  editorFontSize: EDITOR_FONT_SIZE_DEFAULT,
   customInstructions: "",
   autostart: false,
   restoreWindowState: true,
@@ -388,6 +398,9 @@ export async function loadPreferences(): Promise<Preferences> {
         return stored;
       return DEFAULT_PREFERENCES.editorTheme;
     })(),
+    editorFontSize: clampEditorFontSize(
+      get<number>(KEY_EDITOR_FONT_SIZE) ?? DEFAULT_PREFERENCES.editorFontSize,
+    ),
     customInstructions:
       get<string>(KEY_CUSTOM_INSTRUCTIONS) ??
       DEFAULT_PREFERENCES.customInstructions,
@@ -619,6 +632,18 @@ export async function setDefaultModel(value: ModelId): Promise<void> {
 
 export async function setEditorTheme(value: EditorThemePref): Promise<void> {
   await writePref(KEY_EDITOR_THEME, value);
+}
+
+export function clampEditorFontSize(value: number): number {
+  if (!Number.isFinite(value)) return EDITOR_FONT_SIZE_DEFAULT;
+  return Math.min(
+    EDITOR_FONT_SIZE_MAX,
+    Math.max(EDITOR_FONT_SIZE_MIN, Math.round(value)),
+  );
+}
+
+export async function setEditorFontSize(value: number): Promise<void> {
+  await writePref(KEY_EDITOR_FONT_SIZE, clampEditorFontSize(value));
 }
 
 export async function setCustomInstructions(value: string): Promise<void> {
@@ -884,6 +909,7 @@ export async function onPreferencesChange(
     [KEY_BG_BLUR]: "backgroundBlur",
     [KEY_DEFAULT_MODEL]: "defaultModelId",
     [KEY_EDITOR_THEME]: "editorTheme",
+    [KEY_EDITOR_FONT_SIZE]: "editorFontSize",
     [KEY_CUSTOM_INSTRUCTIONS]: "customInstructions",
     [KEY_AUTOSTART]: "autostart",
     [KEY_RESTORE_WINDOW]: "restoreWindowState",
