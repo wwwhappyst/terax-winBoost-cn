@@ -23,6 +23,7 @@ import {
   useMemo,
   useState,
 } from "react";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { Streamdown } from "streamdown";
 import { ChatStreamingProvider } from "./chat-code";
 import { MarkdownCode } from "./markdown-code";
@@ -325,7 +326,26 @@ export type MessageResponseProps = ComponentProps<typeof Streamdown> & {
   streaming?: boolean;
 };
 
-const streamdownComponents = { code: MarkdownCode };
+const MarkdownLink = ({
+  href,
+  children,
+  ...props
+}: ComponentProps<"a">) => (
+  <a
+    {...props}
+    href={href}
+    onClick={(e) => {
+      e.preventDefault();
+      if (href && /^https?:\/\//i.test(href)) {
+        void openUrl(href).catch(console.error);
+      }
+    }}
+  >
+    {children}
+  </a>
+);
+
+const streamdownComponents = { code: MarkdownCode, a: MarkdownLink };
 
 export const MessageResponse = memo(
   ({ className, streaming = false, ...props }: MessageResponseProps) => (

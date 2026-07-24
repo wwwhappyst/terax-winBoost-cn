@@ -5,7 +5,30 @@ use std::sync::Mutex;
 use tauri::{Emitter, Manager, State, WebviewUrl, WebviewWindowBuilder};
 #[cfg(target_os = "macos")]
 use tauri::{PhysicalPosition, WindowEvent};
+use tauri_plugin_opener::OpenerExt;
 use tauri_plugin_window_state::StateFlags;
+
+/// 是否允许 WebView 内导航。只放行应用自身源，其它 http(s) 走系统浏览器。
+fn allow_webview_navigation(url: &tauri::Url) -> bool {
+    match url.scheme() {
+        "tauri" | "ipc" | "asset" | "data" | "blob" => true,
+        "http" | "https" => {
+            let host = url.host_str().unwrap_or_default();
+            if matches!(
+                host,
+                "asset.localhost" | "ipc.localhost" | "tauri.localhost"
+            ) {
+                return true;
+            }
+            // 开发态 Vite：仅本机 1420，其它端口（如管理面板）禁止页内跳转
+            if matches!(host, "localhost" | "127.0.0.1") {
+                return url.port() == Some(1420);
+            }
+            false
+        }
+        _ => false,
+    }
+}
 
 /// Drained on first read so HMR / re-mounts can't replay the launch dir.
 #[derive(Default)]
@@ -117,12 +140,15 @@ pub fn run() {
         let args: Vec<String> = std::env::args().collect();
         if args.get(1).map(String::as_str) == Some("__terax_notify") {
             if let (Some(agent), Some(event)) = (args.get(2), args.get(3)) {
-                agent::emit_conout_marker(agent, event);
+                // 优先命名管道直达主进程；失败再回退 ConPTY 写入。
+                if !agent::send_notify_ipc(agent, event) {
+                    agent::emit_conout_marker(agent, event);
+                }
             }
             use std::io::Write;
-            let mut out = std::io::stdout();
-            let _ = out.write_all(b"{}");
-            let _ = out.flush();
+            // 不向 stdout 写 `{}`：Grok 会把残缺 JSON 当决策解析失败；
+            // Windows hook 命令由 shell 负责 `printf '{}'; true`。
+            let _ = std::io::stdout().flush();
             std::process::exit(0);
         }
     }
@@ -153,25 +179,23 @@ pub fn run() {
                 .build(),
         )
         .plugin(tauri_plugin_opener::init())
-        .setup(|_app| {
-            // macOS skips parent() for the settings window, so tie its lifecycle
-            // to the main window here instead. Other platforms keep parent().
-            #[cfg(target_os = "macos")]
-            if let Some(main) = _app.get_webview_window("main") {
-                let handle = _app.handle().clone();
-                main.on_window_event(move |event| {
-                    if matches!(
-                        event,
-                        WindowEvent::CloseRequested { .. } | WindowEvent::Destroyed
-                    ) {
-                        if let Some(settings) = handle.get_webview_window("settings") {
-                            let _ = settings.close();
-                        }
+        .plugin(
+            tauri::plugin::Builder::<tauri::Wry, ()>::new("external-link-guard")
+                .on_navigation(|webview, url| {
+                    if allow_webview_navigation(url) {
+                        return true;
                     }
-                });
-            }
-            Ok(())
-        })
+                    // 拒绝离开应用源；外链改用系统默认浏览器打开
+                    if matches!(url.scheme(), "http" | "https") {
+                        let _ = webview
+                            .app_handle()
+                            .opener()
+                            .open_url(url.as_str(), None::<&str>);
+                    }
+                    false
+                })
+                .build(),
+        )
         .manage(pty::PtyState::default())
         .manage(shell::ShellState::default())
         .manage(secrets::SecretsState::default())
@@ -188,6 +212,27 @@ pub fn run() {
             registry
         })
         .manage(LaunchDir(Mutex::new(cli_dir)))
+        .setup(|app| {
+            // macOS skips parent() for the settings window, so tie its lifecycle
+            // to the main window here instead. Other platforms keep parent().
+            #[cfg(target_os = "macos")]
+            if let Some(main) = app.get_webview_window("main") {
+                let handle = app.handle().clone();
+                main.on_window_event(move |event| {
+                    if matches!(
+                        event,
+                        WindowEvent::CloseRequested { .. } | WindowEvent::Destroyed
+                    ) {
+                        if let Some(settings) = handle.get_webview_window("settings") {
+                            let _ = settings.close();
+                        }
+                    }
+                });
+            }
+            #[cfg(windows)]
+            agent::start_notify_listener(app.handle().clone());
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             pty::pty_open,
             pty::pty_write,

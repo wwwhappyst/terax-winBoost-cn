@@ -30,6 +30,7 @@ import {
   applyTheme as applyPoolTheme,
   applyScrollback,
   applyWebglPreference,
+  clearSlotLiveModes,
   configureRendererPool,
   discardRetainedSlot,
   disposeLeafSlot,
@@ -89,6 +90,9 @@ type Session = {
   // at the most recent release. Read once on the next bind to trigger a
   // SIGWINCH-driven repaint instead of replaying dormant bytes.
   altScreenAtRelease: boolean;
+  // 最近一次快照时开启的上报类 DEC 私有模式（鼠标上报、括号粘贴等），
+  // 重绑 slot 时在 reset 之后恢复，否则运行中的 TUI 鼠标失效。
+  modes: number[];
   // OSC 133 C..D window (or blocks running mode): a foreground process owns
   // the terminal, so the leaf must keep its live grid while hidden.
   commandRunning: boolean;
@@ -420,6 +424,7 @@ configureRendererPool({
     if (out.cols > 0) s.cols = out.cols;
     if (out.rows > 0) s.rows = out.rows;
     s.altScreenAtRelease = out.altScreen;
+    s.modes = out.modes;
   },
 });
 
@@ -460,6 +465,7 @@ function ensureSession(
     inputActive: false,
     everSubmitted: false,
     altScreenAtRelease: false,
+    modes: [],
     commandRunning: false,
     hiddenReleaseTimer: null,
     spawnFailed: false,
@@ -591,6 +597,7 @@ function bindLeafToSlot(leafId: number, s: Session): void {
     container: s.container,
     snapshot: s.snapshot,
     altScreen,
+    modes: s.modes,
     drainRing: (write) => s.dormantRing.drain(write),
     // Keep stdin alive after a spawn failure so Enter can trigger the retry.
     shellExited: s.shellExited && !s.spawnFailed,
@@ -728,6 +735,7 @@ export async function respawnSession(
   s.pendingExit = null;
   s.pendingInput = "";
   s.altScreenAtRelease = false;
+  s.modes = [];
   s.commandRunning = false;
   s.spawnFailed = false;
   cancelHiddenRelease(s);
@@ -737,6 +745,7 @@ export async function respawnSession(
     slot.term.options.disableStdin = false;
     slot.term.clear();
     slot.term.reset();
+    clearSlotLiveModes(slot);
   } else {
     discardRetainedSlot(leafId);
   }

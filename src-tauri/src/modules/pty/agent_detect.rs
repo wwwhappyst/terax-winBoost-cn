@@ -5,7 +5,7 @@ const ST_FINAL: u8 = b'\\';
 
 const OSC_MAX: usize = 2048;
 
-const DEFAULT_AGENTS: &[&str] = &["claude", "codex", "gemini", "grok", "opencode"];
+const DEFAULT_AGENTS: &[&str] = &["claude", "codex", "gemini", "grok", "opencode", "kimi"];
 
 // OSC 777 marker our agent hooks emit. Legacy 3-field `notify;Terax;<event>`
 // (Claude) or 4-field `notify;Terax;<agent>;<event>` (Codex/Gemini).
@@ -363,6 +363,19 @@ mod tests {
                 vec![started(agent), Transition::Finished],
             );
         }
+    }
+
+    #[test]
+    fn named_markers_self_arm_kimi() {
+        // Kimi Code 与 Grok/OpenCode 一样依赖四段命名 OSC 自启动。
+        let mut detector = AgentDetector::new();
+        assert_eq!(
+            run(
+                &mut detector,
+                &osc("777;notify;Terax;kimi;finished"),
+            ),
+            vec![started("kimi"), Transition::Finished],
+        );
     }
 
     #[test]

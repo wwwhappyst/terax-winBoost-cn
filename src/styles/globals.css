@@ -449,6 +449,36 @@ html *::-webkit-scrollbar {
   animation: terax-shimmer var(--shimmer-duration, 2s) linear infinite;
 }
 
+/* CLI 完成：主题色慢闪描边（仅对应终端分屏）。 */
+@keyframes terax-finished-pulse {
+  0%,
+  100% {
+    box-shadow: inset 0 0 0 2px color-mix(in oklch, var(--primary) 35%, transparent);
+  }
+  50% {
+    box-shadow: inset 0 0 0 2px color-mix(in oklch, var(--primary) 90%, transparent);
+  }
+}
+.terax-finished-pulse {
+  animation: terax-finished-pulse 1.8s ease-in-out infinite;
+}
+
+/* CLI 完成：页签主题色慢闪，点击后停止。 */
+@keyframes terax-tab-finished-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 1px color-mix(in oklch, var(--primary) 40%, transparent);
+    color: var(--primary);
+  }
+  50% {
+    box-shadow: 0 0 0 1.5px color-mix(in oklch, var(--primary) 95%, transparent);
+    color: var(--primary);
+  }
+}
+.terax-tab-finished-pulse {
+  animation: terax-tab-finished-pulse 1.8s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   :root {
     --dur-fast: 0.01ms;
@@ -461,5 +491,14 @@ html *::-webkit-scrollbar {
   .terax-shimmer {
     animation: none;
     background-position: 0% center;
+  }
+  .terax-finished-pulse {
+    animation: none;
+    box-shadow: inset 0 0 0 2px color-mix(in oklch, var(--primary) 75%, transparent);
+  }
+  .terax-tab-finished-pulse {
+    animation: none;
+    box-shadow: 0 0 0 1.5px color-mix(in oklch, var(--primary) 80%, transparent);
+    color: var(--primary);
   }
 }

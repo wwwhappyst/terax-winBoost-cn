@@ -13,16 +13,10 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   type ReactNode,
-  type RefObject,
   useEffect,
   useRef,
   useState,
 } from "react";
-import {
-  SearchInline,
-  type SearchInlineHandle,
-  type SearchTarget,
-} from "./SearchInline";
 
 type Props = {
   tabs: Tab[];
@@ -48,8 +42,6 @@ type Props = {
   onActivateLocalAgent: () => void;
   onOpenSettings: () => void;
   spaceSwitcher: ReactNode;
-  searchTarget: SearchTarget;
-  searchRef: RefObject<SearchInlineHandle | null>;
 };
 
 const COMPACT_WIDTH = 720;
@@ -75,8 +67,6 @@ export function Header({
   onActivateLocalAgent,
   onOpenSettings,
   spaceSwitcher,
-  searchTarget,
-  searchRef,
 }: Props) {
   const rootRef = useRef<HTMLDivElement>(null);
   const [compact, setCompact] = useState(false);
@@ -169,8 +159,6 @@ export function Header({
         />
         <div data-tauri-drag-region className="h-full min-w-2 flex-1" />
       </div>
-
-      <SearchInline ref={searchRef} target={searchTarget} compact={compact} />
 
       {IS_MAC && (
         <>

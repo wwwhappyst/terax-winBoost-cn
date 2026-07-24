@@ -162,6 +162,12 @@ export type Preferences = {
   zoomLevel: number;
   aiMiniZoom: number;
   agentNotifications: boolean;
+  /** 鼠标移入窗口时自动抢焦点，无需点击。 */
+  focusFollowsMouse: boolean;
+  /**
+   * 终端页签用 tab1/tab2… 命名。默认 false，保持上游 cwd 文件夹名，降低合入冲突。
+   */
+  terminalNumberedTabLabels: boolean;
   defaultWorkspaceEnv: string;
   shortcuts: Record<ShortcutId, KeyBinding[]>;
   editorAutoSave: boolean;
@@ -253,6 +259,8 @@ const KEY_LAST_WSL_DISTRO = "lastWslDistro";
 const KEY_ZOOM_LEVEL = "zoomLevel";
 const KEY_AI_MINI_ZOOM = "aiMiniZoom";
 const KEY_AGENT_NOTIFICATIONS = "agentNotifications";
+const KEY_FOCUS_FOLLOWS_MOUSE = "focusFollowsMouse";
+const KEY_TERMINAL_NUMBERED_TAB_LABELS = "terminalNumberedTabLabels";
 const KEY_DEFAULT_WORKSPACE_ENV = "defaultWorkspaceEnv";
 const KEY_SHORTCUTS = "shortcuts";
 const KEY_EDITOR_AUTO_SAVE = "editorAutoSave";
@@ -339,6 +347,8 @@ export const DEFAULT_PREFERENCES: Preferences = {
   zoomLevel: 1.0,
   aiMiniZoom: 1.0,
   agentNotifications: true,
+  focusFollowsMouse: false,
+  terminalNumberedTabLabels: false,
   defaultWorkspaceEnv: "local",
   shortcuts: {} as Record<ShortcutId, KeyBinding[]>,
   editorAutoSave: false,
@@ -510,6 +520,12 @@ export async function loadPreferences(): Promise<Preferences> {
     agentNotifications:
       get<boolean>(KEY_AGENT_NOTIFICATIONS) ??
       DEFAULT_PREFERENCES.agentNotifications,
+    focusFollowsMouse:
+      get<boolean>(KEY_FOCUS_FOLLOWS_MOUSE) ??
+      DEFAULT_PREFERENCES.focusFollowsMouse,
+    terminalNumberedTabLabels:
+      get<boolean>(KEY_TERMINAL_NUMBERED_TAB_LABELS) ??
+      DEFAULT_PREFERENCES.terminalNumberedTabLabels,
     defaultWorkspaceEnv:
       get<string>(KEY_DEFAULT_WORKSPACE_ENV) ??
       DEFAULT_PREFERENCES.defaultWorkspaceEnv,
@@ -879,6 +895,16 @@ export async function setAgentNotifications(value: boolean): Promise<void> {
   await writePref(KEY_AGENT_NOTIFICATIONS, value);
 }
 
+export async function setFocusFollowsMouse(value: boolean): Promise<void> {
+  await writePref(KEY_FOCUS_FOLLOWS_MOUSE, value);
+}
+
+export async function setTerminalNumberedTabLabels(
+  value: boolean,
+): Promise<void> {
+  await writePref(KEY_TERMINAL_NUMBERED_TAB_LABELS, value);
+}
+
 export async function setDefaultWorkspaceEnv(value: string): Promise<void> {
   await writePref(KEY_DEFAULT_WORKSPACE_ENV, value);
 }
@@ -949,6 +975,8 @@ export async function onPreferencesChange(
     [KEY_ZOOM_LEVEL]: "zoomLevel",
     [KEY_AI_MINI_ZOOM]: "aiMiniZoom",
     [KEY_AGENT_NOTIFICATIONS]: "agentNotifications",
+    [KEY_FOCUS_FOLLOWS_MOUSE]: "focusFollowsMouse",
+    [KEY_TERMINAL_NUMBERED_TAB_LABELS]: "terminalNumberedTabLabels",
     [KEY_DEFAULT_WORKSPACE_ENV]: "defaultWorkspaceEnv",
     [KEY_SHORTCUTS]: "shortcuts",
     [KEY_EDITOR_AUTO_SAVE]: "editorAutoSave",

@@ -98,6 +98,12 @@ export const ZH_CN: Record<string, string> = {
   "Restore window position & size": "恢复窗口位置和大小",
   "Reopen the main window where you left it. Applies on next launch.":
     "下次启动时恢复主窗口上次的位置和大小。",
+  "Focus on hover": "鼠标悬停 0.8 秒后聚焦",
+  "Focus Terax after the pointer stays over the window for 0.8 seconds, without clicking.":
+    "指针在窗口上停留 0.8 秒后自动聚焦，无需点击。",
+  "Numbered terminal tabs": "终端页签按序号命名",
+  "Name terminal tabs tab1, tab2, … instead of the folder name. Off by default to match upstream.":
+    "将终端页签显示为 tab1、tab2…，而不是文件夹名。默认关闭以与上游一致。",
   "Font family": "字体系列",
   "Nerd Font name for icons (e.g. \"CaskaydiaCove Nerd Font Mono\"). Leave blank to auto-detect.":
     "用于图标的 Nerd Font 名称（例如“CaskaydiaCove Nerd Font Mono”）；留空则自动检测。",
@@ -332,6 +338,8 @@ export const ZH_CN: Record<string, string> = {
   "Local & custom": "本地与自定义",
   "not connected": "未连接",
   "Manual (": "手动（",
+  "Manual ({shortcut})": "手动（{shortcut}）",
+  shortcut: "快捷键",
   "isn't connected — add it below.": "尚未连接，请在下方添加。",
   Docs: "文档",
   Test: "测试",
@@ -378,6 +386,9 @@ export const ZH_CN: Record<string, string> = {
   Providers: "提供商",
   Defaults: "默认值",
   "Automatic (as you type)": "自动（输入时触发）",
+  "Chat model": "对话模型",
+  Autocomplete: "自动补全",
+  Trigger: "触发方式",
   "Remove provider": "移除提供商",
   "Remove key": "移除密钥",
   "Optional — leave empty for unauthenticated endpoints":
@@ -388,6 +399,15 @@ export const ZH_CN: Record<string, string> = {
   "Reachable — server responded.": "连接正常，服务器已响应。",
   "Could not reach the server.": "无法连接服务器。",
   "Voice input": "语音输入",
+  "Paste API key": "粘贴 API 密钥",
+  "Hide key": "隐藏密钥",
+  "Show key": "显示密钥",
+  "Uses your official OpenAI API key and the Whisper model for transcription.":
+    "使用你的官方 OpenAI API 密钥和 Whisper 模型进行语音转写。",
+  "Uses your official Groq API key and Groq's Whisper endpoint for transcription.":
+    "使用你的官方 Groq API 密钥和 Groq 的 Whisper 端点进行语音转写。",
+  "Connects to a local Whisper.cpp server for fully offline transcription.":
+    "连接本地 Whisper.cpp 服务器，实现完全离线的语音转写。",
   Provider: "提供商",
   "Base URL": "基础 URL",
   "The Hugging Face repo path you launched mlx_lm.server with.":
@@ -497,6 +517,15 @@ export const ZH_CN: Record<string, string> = {
   "Show hidden folders": "显示隐藏文件夹",
   Todos: "待办事项",
   "Ask Terax anything": "向 Terax 提问",
+  "Terax sees the active terminal — cwd, recent commands, and output.":
+    "Terax 可以读取当前终端的工作目录、最近命令和输出。",
+  "Explain the last error": "解释最近一次错误",
+  "Read the terminal buffer": "读取终端缓冲区",
+  "Generate a command": "生成命令",
+  "Tell me what you want to do": "告诉我你想完成什么",
+  "Summarize buffer": "总结终端缓冲区",
+  "Recap recent activity": "概述最近活动",
+  "New chat": "新对话",
   "Something went wrong.": "出现错误。",
   "Upstream update available": "上游有可用更新",
   "Upstream Terax v{version} is available": "上游 Terax v{version} 已发布",

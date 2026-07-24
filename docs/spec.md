@@ -149,7 +149,7 @@ OSC 格式保持为：
 ESC ] 777 ; notify ; Terax ; <agent> ; <event> BEL
 ```
 
-`<agent>` 只允许 `claude`、`codex`、`gemini`、`grok`、`opencode`；`<event>` 只处理 `working`、`attention`、`finished`。未知名称或事件必须忽略。
+`<agent>` 只允许 `claude`、`codex`、`gemini`、`grok`、`opencode`、`kimi`；`<event>` 只处理 `working`、`attention`、`finished`。未知名称或事件必须忽略。
 
 ### 6.2 Agent 事件映射
 
@@ -158,12 +158,15 @@ ESC ] 777 ; notify ; Terax ; <agent> ; <event> BEL
 | Claude Code | `~/.claude/settings.json` | `UserPromptSubmit` | `Notification` | `Stop` | `terminalSequence` |
 | Codex | `~/.codex/hooks.json` | `UserPromptSubmit` | `PermissionRequest` | `Stop` | Windows `CONOUT$` 辅助入口 |
 | Gemini | `~/.gemini/settings.json` | `BeforeAgent` | `Notification` | `AfterAgent` | Windows `CONOUT$` 辅助入口 |
-| Grok | `~/.grok/hooks/terax.json` | `UserPromptSubmit` | `Notification` | `Stop` | Windows `CONOUT$` 辅助入口 |
+| Grok | `~/.grok/hooks/terax.json` | `UserPromptSubmit` | 不映射（Grok `Notification` 会在回合结束误触发） | `Stop` | Windows 命名管道优先，`CONOUT$` 回退 |
 | OpenCode | `~/.config/opencode/plugins/terax-agent-notifications.js` | 不要求 | `permission.asked` | `session.idle` | 插件向 stdout 写入 OSC |
+| Kimi | `~/.kimi-code/config.toml`（可用 `KIMI_CODE_HOME` 覆盖） | `UserPromptSubmit` | `PermissionRequest` | `Stop` | Windows `CONOUT$` 辅助入口 |
 
 Grok 适配遵循 xAI 官方 Hook 协议：<https://docs.x.ai/build/features/hooks>。
 
 OpenCode 适配遵循官方插件事件协议：<https://opencode.ai/docs/plugins/>。
+
+Kimi 适配遵循 Kimi Code CLI Hooks 协议：<https://moonshotai.github.io/kimi-code/en/customization/hooks>。Kimi 使用 TOML `[[hooks]]` 数组；安装时剥离旧 Terax 项并保留用户与其它工具的 hook。Hook 命令不得向 stdout 输出 JSON，以免污染会话上下文。
 
 OpenCode 只依赖完成和权限事件；不为显示“工作中”状态额外推断消息或工具调用。`session.idle` 每次代表一次任务完成，由现有 AgentDetector 负责把命名标记关联到当前 PTY。
 
@@ -173,9 +176,17 @@ OpenCode 只依赖完成和权限事件；不为显示“工作中”状态额�
 - Claude、Codex、Gemini 和 Grok 使用现有 JSON 解析、保留外部 Hook、原子写入和幂等合并原则。
 - Grok 使用 Terax 专用文件，但仍需解析并保留其中非 Terax 内容；无效 JSON 时拒绝覆盖。
 - OpenCode 使用 Terax 专用插件文件。若同名文件存在但没有 Terax 所有权标记，必须拒绝覆盖并显示错误。
+- Kimi 写入共享 `config.toml`：只增删带 Terax 所有权标记的 `[[hooks]]` 表，不得覆盖其余配置。
 - 状态检查只返回布尔状态或可显示错误，不把完整 Agent 配置返回给前端。
+- Windows `__terax_notify` 优先通过本地命名管道 `\\.\pipe\terax-agent-notify` 把事件交给主进程，再按 hook 进程祖先链匹配 PTY 会话并直接发出 `terax:agent-signal`。ConPTY/`AttachConsole` 仅作回退。这是为了解决 Grok 等经 `sh -c` 启动 hook 时 OSC 写不进终端、活动任务一直停在「工作中」的问题。
+- 命名管道须支持并发连接：Grok 会合并加载 `~/.claude/settings.json` 与 `~/.grok/hooks/*.json`，同一回合常并发触发多条 Stop；单实例管道会导致后到的 hook 超时回退并被标成失败。
+- 主进程须按调用方进程树校验 hook 声明的 `<agent>`（例如拒绝在 `grok.exe` 树内接受 `claude` 通知），避免 Claude 兼容钩子在 Grok 会话中误报「Claude Code 已完成 / 需要输入」。
+- 进程树校验必须「能认出才拦」：Grok hook runner 常断链（祖先只剩 `cmd`/`terax` 助手），看不到 CLI 时应放行，否则 `finished` 被误杀会导致活动任务永远「工作中」、完成闪烁不出现。若树中明确出现其它已知 agent，再拒绝串台。
+- 前端在同一 leaf 的 `finished` 之后短窗口内忽略随后的 `attention`，避免 Stop 与 Notification 连弹两条系统通知、并在完成后又回到「等待中」。
 - Windows Hook 状态必须确认命令指向当前有效的 Terax 可执行文件。开发版、正式版或安装目录变化后，旧路径不得被误报为已启用。
-- Hook 命令继续使用 `TERAX_TERMINAL` 环境变量限制作用范围，避免在其他终端中向 Terax 发送标记。
+- Hook 命令继续使用 `TERAX_TERMINAL` 环境变量限制 ConPTY 回退路径的作用范围；命名管道路径仅在能匹配到 Terax 会话时生效，因此在外部终端运行同名 hook 不会误报。
+- Windows 新装的 hook 命令须显式带上 `TERAX_TERMINAL=1`，防止 hook runner 清环境后 ConPTY 回退静默空跑。
+- Windows 对外安装的 hook `command` 必须是无空格、无重定向的旁路 `.cmd` 路径（如 `…/terax_notify_grok_working.cmd`）。含 `>`/`;`/`TERAX_TERMINAL=1` 的一行命令会迫使 Grok 走 `sh -c`，GUI 子系统常假报 exit 1。`.cmd` 内调用 `__terax_notify` 并以 `exit /b 0` 结束。
 - Hook 安装失败必须显示明确的应用内错误，禁止静默失败。
 
 ### 6.4 通知路由
@@ -189,6 +200,7 @@ OpenCode 只依赖完成和权限事件；不为显示“工作中”状态额�
 | 前台 | 当前正在查看 Agent | 只记录通知，不弹出提示 |
 
 - `attention` 和 `finished` 均遵循上述路由。
+- `finished` 额外：对应终端分屏（`leafId`）以外框主题色慢闪提示；指针悬停或在该分屏内移动后停止。同一页签其他分屏不受影响。即使当前正在查看该分屏也会闪烁，直到鼠标移入确认。所属页签同时以主题色慢闪；点击页签不停止闪烁。仅当该页签内所有闪烁分屏都已因悬停消除后，页签闪烁才自动停止。
 - 通知设置关闭时，不新增通知记录，也不发送系统或应用内提示。
 - 系统通知权限被拒绝或调用失败时，不影响通知记录和应用稳定性；技术原因写入开发日志。
 
@@ -201,11 +213,11 @@ OpenCode 只依赖完成和权限事件；不为显示“工作中”状态额�
 | `modules/i18n` | 翻译查询、占位符替换、当前语言读取 |
 | `modules/settings/store.ts` | 持久化语言偏好并广播跨窗口变化 |
 | `GeneralSection.tsx` | 提供界面语言选择 |
-| `agent.rs` | 安装和检查五种 Agent 的 Hook/插件配置 |
+| `agent.rs` | 安装和检查六种 Agent 的 Hook/插件配置 |
 | `agent_detect.rs` | 解析受信任格式的命名 OSC Agent 事件 |
 | `AgentNotificationsBridge.tsx` | 将 PTY Agent 事件转换为统一通知请求 |
 | `route.ts` | 记录通知并依据焦点和可见性选择通知方式 |
-| `NotificationBell.tsx` | 展示通知历史、五种 Agent 的启用状态和安装错误 |
+| `NotificationBell.tsx` | 展示通知历史、六种 Agent 的启用状态和安装错误 |
 
 不得为每个 Agent 建立独立通知管线。除 OpenCode 插件文件格式不同外，新增 Agent 必须尽量复用现有 `AgentSpec`、OSC 和通知路由。
 
@@ -234,7 +246,7 @@ OpenCode 只依赖完成和权限事件；不为显示“工作中”状态额�
 - PowerShell 中无选区按 `Ctrl+C` 能中断前台命令。
 - 有终端选区时按 `Ctrl+C` 能复制且不向 CLI 发送中断。
 - `Ctrl+V` 能粘贴英文、中文和多行内容。
-- 五种 Agent CLI 中的行为与普通 PowerShell 一致。
+- 六种 Agent CLI 中的行为与普通 PowerShell 一致。
 
 ### 10.2 简体中文
 
@@ -244,7 +256,7 @@ OpenCode 只依赖完成和权限事件；不为显示“工作中”状态额�
 
 ### 10.3 Agent 通知
 
-- 五种 Agent 均可在通知铃中检查和启用适配。
+- 六种 Agent 均可在通知铃中检查和启用适配。
 - 每种 Agent 完成一次任务时只产生一次 `finished` 通知记录。
 - 失焦、前台隐藏、前台可见三种场景符合通知路由表。
 - Agent 配置无效、文件冲突或 Hook 路径失效时给出明确错误且不覆盖原文件。
@@ -253,5 +265,5 @@ OpenCode 只依赖完成和权限事件；不为显示“工作中”状态额�
 
 - TypeScript 类型检查和现有前端 Lint 通过。
 - 现有前端测试、Rust 单元测试和 Clippy 检查通过。
-- Windows 开发运行中完成快捷键、语言切换和五种 Agent 通知的人工验收。
+- Windows 开发运行中完成快捷键、语言切换和六种 Agent 通知的人工验收。
 - 未产生未列明的依赖、缓存、临时配置或构建产物。

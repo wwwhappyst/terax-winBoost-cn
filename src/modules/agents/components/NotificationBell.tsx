@@ -79,7 +79,7 @@ const NOTIF_LABEL: Record<AgentNotification["kind"], string> = {
   error: "failed",
 };
 
-const HOOK_AGENTS = ["claude", "codex", "gemini", "grok", "opencode"] as const;
+const HOOK_AGENTS = ["claude", "codex", "gemini", "grok", "opencode", "kimi"] as const;
 
 function HookAgentRow({
   id,
@@ -214,7 +214,9 @@ export function NotificationBell({ onActivate, onActivateLocal }: Props) {
     setInstalling(id);
     try {
       await invoke("agent_enable_hooks", { agent: id });
-      setHooks((h) => ({ ...h, [id]: true }));
+      // 以后端状态为准，避免乐观 true 掩盖路径/JSON 转义导致的假启用。
+      const ok = await invoke<boolean>("agent_hooks_status", { agent: id });
+      setHooks((h) => ({ ...h, [id]: ok }));
     } catch (error) {
       setHooks((h) => ({ ...h, [id]: false }));
       toast.error(t("Failed to enable {agent} hooks", { agent: displayAgent(id) }), {

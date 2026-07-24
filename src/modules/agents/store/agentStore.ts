@@ -14,9 +14,16 @@ type AgentStoreState = {
   sessions: Record<number, AgentSession>;
   localAgent: LocalAgentState;
   notifications: AgentNotification[];
+  /** CLI 完成后待悬停确认的分屏：leafId → 所属 tabId。 */
+  pulsingLeaves: Record<number, number>;
+  /** CLI 完成后待点击确认的页签；若该页签下已无闪烁分屏则自动清除。 */
+  pulsingTabs: Record<number, true>;
   start: (leafId: number, tabId: number, agent: string) => void;
   setStatus: (leafId: number, status: AgentStatus) => void;
   finish: (leafId: number) => void;
+  startPulse: (leafId: number, tabId: number) => void;
+  clearPulse: (leafId: number) => void;
+  clearTabPulse: (tabId: number) => void;
   setLocalAgent: (state: LocalAgentState) => void;
   pushNotification: (
     n: Omit<AgentNotification, "id" | "at" | "read">,
@@ -29,6 +36,8 @@ export const useAgentStore = create<AgentStoreState>((set) => ({
   sessions: {},
   localAgent: null,
   notifications: [],
+  pulsingLeaves: {},
+  pulsingTabs: {},
 
   start: (leafId, tabId, agent) =>
     set((s) => {
@@ -75,6 +84,44 @@ export const useAgentStore = create<AgentStoreState>((set) => ({
       return { sessions: next };
     }),
 
+  startPulse: (leafId, tabId) =>
+    set((s) => {
+      const leaves =
+        s.pulsingLeaves[leafId] === tabId
+          ? s.pulsingLeaves
+          : { ...s.pulsingLeaves, [leafId]: tabId };
+      const tabs = s.pulsingTabs[tabId]
+        ? s.pulsingTabs
+        : { ...s.pulsingTabs, [tabId]: true as const };
+      if (leaves === s.pulsingLeaves && tabs === s.pulsingTabs) return s;
+      return { pulsingLeaves: leaves, pulsingTabs: tabs };
+    }),
+
+  clearPulse: (leafId) =>
+    set((s) => {
+      const tabId = s.pulsingLeaves[leafId];
+      if (tabId === undefined) return s;
+      const nextLeaves = { ...s.pulsingLeaves };
+      delete nextLeaves[leafId];
+      // 该页签下已无闪烁分屏时，页签闪烁一并消失。
+      const tabStillPulsing = Object.values(nextLeaves).some((id) => id === tabId);
+      if (tabStillPulsing || !s.pulsingTabs[tabId]) {
+        return { pulsingLeaves: nextLeaves };
+      }
+      const nextTabs = { ...s.pulsingTabs };
+      delete nextTabs[tabId];
+      return { pulsingLeaves: nextLeaves, pulsingTabs: nextTabs };
+    }),
+
+  clearTabPulse: (tabId) =>
+    set((s) => {
+      // 仅当该页签下已无闪烁分屏时才允许清除（点击页签不能强行停闪）。
+      if (!s.pulsingTabs[tabId]) return s;
+      if (Object.values(s.pulsingLeaves).some((id) => id === tabId)) return s;
+      const next = { ...s.pulsingTabs };
+      delete next[tabId];
+      return { pulsingTabs: next };
+    }),
   setLocalAgent: (state) =>
     set((s) => {
       const a = s.localAgent;

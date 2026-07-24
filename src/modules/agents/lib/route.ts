@@ -2,6 +2,7 @@ import { usePreferencesStore } from "@/modules/settings/preferences";
 import { showAgentToast } from "../components/AgentToast";
 import { useAgentStore } from "../store/agentStore";
 import { osNotify } from "./notify";
+import { setPendingAgentActivate } from "./pendingActivate";
 import type { AgentSource, NotificationKind } from "./types";
 
 type RouteArgs = {
@@ -39,6 +40,9 @@ export function routeAgentNotification({
 
   if (focused && visible) return;
   if (!focused) {
+    // Windows 通知点击只会把窗口拉到前台，不会回调 onActivate；
+    // 记下待办，等焦点回来时切到对应页签并做输入恢复。
+    setPendingAgentActivate(onActivate);
     void osNotify(title, body ?? agent);
     return;
   }

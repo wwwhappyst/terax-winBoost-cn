@@ -19,6 +19,10 @@ type Ctx = {
   onActivate: Activate;
 };
 
+/** 同一 leaf 在 finished 后短时间内忽略 attention，避免 Stop+Notification 连弹。 */
+const ATTENTION_SUPPRESS_MS = 3000;
+const recentFinishedAt = new Map<number, number>();
+
 function tabInfo(
   tabs: Tab[],
   leafId: number,
@@ -66,27 +70,53 @@ function handleSignal(sig: AgentSignal, ctx: Ctx): void {
     case "started": {
       const info = tabInfo(ctx.tabs, leafId);
       if (!info) return;
-      store.start(leafId, info.tabId, sig.agent ?? "agent");
+      const agent = sig.agent ?? "agent";
+      // Grok 会误跑 ~/.claude hooks：已识别为其它 agent 时忽略 claude 串台。
+      const existing = store.sessions[leafId];
+      if (
+        existing &&
+        agent === "claude" &&
+        existing.agent !== "claude"
+      ) {
+        return;
+      }
+      store.start(leafId, info.tabId, agent);
       return;
     }
     case "working":
       store.setStatus(leafId, "working");
       return;
     case "attention": {
+      const finishedAt = recentFinishedAt.get(leafId);
+      if (
+        finishedAt !== undefined &&
+        Date.now() - finishedAt < ATTENTION_SUPPRESS_MS
+      ) {
+        return;
+      }
       store.setStatus(leafId, "waiting");
       const session = store.sessions[leafId];
       if (session) route(session, "attention", ctx);
       return;
     }
     case "finished": {
-      store.setStatus(leafId, "waiting");
+      // 回合结束：写入「已完成」通知，并移出活动任务。
+      // 勿标成 waiting，否则铃铛会显示「等待中」，与「需要输入」混淆。
+      recentFinishedAt.set(leafId, Date.now());
       const session = store.sessions[leafId];
-      if (session) route(session, "finished", ctx);
+      if (session) {
+        route(session, "finished", ctx);
+        store.finish(leafId);
+        store.startPulse(leafId, session.tabId);
+      } else {
+        store.finish(leafId);
+      }
       maybeTriggerManagedReview(leafId);
       return;
     }
     case "exited":
       store.finish(leafId);
+      store.clearPulse(leafId);
       useManagedAgentsStore.getState().remove(leafId);
       return;
   }

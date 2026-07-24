@@ -41,11 +41,14 @@ import {
   useCallback,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
-import { labelFor } from "./lib/tabLabel";
+import { labelFor, terminalTabNumbers } from "./lib/tabLabel";
 import type { EditorTab, Tab } from "./lib/useTabs";
+import { usePreferencesStore } from "@/modules/settings/preferences";
+import { useAgentStore } from "@/modules/agents/store/agentStore";
 
 type Props = {
   tabs: Tab[];
@@ -97,6 +100,49 @@ export function TabBar({
     fromId: number;
     active: boolean;
   } | null>(null);
+  /** 已 setPointerCapture 的节点；快捷键切页时可能被卸载，需留引用才能释放。 */
+  const captureElRef = useRef<HTMLElement | null>(null);
+  const pulsingTabs = useAgentStore((s) => s.pulsingTabs);
+  const selectTab = useCallback(
+    (id: number) => {
+      // 页签闪烁不因点击停止；仅当该页签内所有 CLI 分屏悬停消除后才停。
+      onSelect(id);
+    },
+    [onSelect],
+  );
+
+  const clearDragState = useCallback(() => {
+    const st = drag.current;
+    const el = captureElRef.current;
+    if (st && el) {
+      try {
+        el.releasePointerCapture(st.pointerId);
+      } catch {
+        // 节点已卸载或捕获已丢失。
+      }
+    }
+    captureElRef.current = null;
+    drag.current = null;
+    setDraggingId(null);
+    setDropGap(null);
+    document.body.style.userSelect = "";
+  }, []);
+
+  const endDrag = (currentTarget: HTMLElement) => {
+    const st = drag.current;
+    if (st) {
+      try {
+        currentTarget.releasePointerCapture?.(st.pointerId);
+      } catch {
+        // ignore
+      }
+    }
+    captureElRef.current = null;
+    drag.current = null;
+    setDraggingId(null);
+    setDropGap(null);
+    document.body.style.userSelect = "";
+  };
 
   // Play the enter animation only for tabs opened after the first paint, never
   // the restored set and never on switch/reorder (triggers are keyed, so they
@@ -111,6 +157,16 @@ export function TabBar({
   useEffect(() => {
     seenRef.current = new Set(tabs.map((t) => t.id));
   }, [tabs]);
+
+  const terminalNumbers = useMemo(() => terminalTabNumbers(tabs), [tabs]);
+  const numberedLabels = usePreferencesStore(
+    (s) => s.terminalNumberedTabLabels,
+  );
+  const tabLabel = (t: Tab) =>
+    labelFor(t, {
+      numberedLabels,
+      terminalNumber: terminalNumbers.get(t.id),
+    });
 
   // Single shared pill slides to the active tab instead of each tab toggling
   // its own background. Measured relative to the list (its offsetParent) so it
@@ -159,15 +215,6 @@ export function TabBar({
     return els.length;
   };
 
-  const endDrag = (currentTarget: HTMLElement) => {
-    const st = drag.current;
-    if (st) currentTarget.releasePointerCapture?.(st.pointerId);
-    drag.current = null;
-    setDraggingId(null);
-    setDropGap(null);
-    document.body.style.userSelect = "";
-  };
-
   // Horizontal wheel scroll without holding shift.
   useEffect(() => {
     const el = scrollRef.current;
@@ -181,6 +228,24 @@ export function TabBar({
     el.addEventListener("wheel", onWheel, { passive: false });
     return () => el.removeEventListener("wheel", onWheel);
   }, []);
+
+  // 鼠标按住页签时若用快捷键切页 / 失焦：必须中断手势。
+  // 否则 pointerup 会再次 selectTab（闪烁），或捕获目标被卸载后鼠标点滚全部失效。
+  useEffect(() => {
+    const abortIfGesturing = () => {
+      if (drag.current) clearDragState();
+    };
+    window.addEventListener("blur", abortIfGesturing);
+    window.addEventListener("keydown", abortIfGesturing, true);
+    return () => {
+      window.removeEventListener("blur", abortIfGesturing);
+      window.removeEventListener("keydown", abortIfGesturing, true);
+    };
+  }, [clearDragState]);
+
+  useEffect(() => {
+    if (drag.current) clearDragState();
+  }, [activeId, clearDragState]);
 
   // Keep the active tab visible after selection / open.
   useEffect(() => {
@@ -199,7 +264,7 @@ export function TabBar({
       <div className="flex w-max items-center gap-0.5">
         <Tabs
           value={String(activeId)}
-          onValueChange={(v) => onSelect(Number(v))}
+          onValueChange={(v) => selectTab(Number(v))}
         >
           <TabsList
             ref={listRef}
@@ -226,6 +291,7 @@ export function TabBar({
               const isPreview = t.kind === "editor" && (t as EditorTab).preview;
               const isActive = t.id === activeId;
               const isNew = !firstRender && !seen.has(t.id);
+              const isPulsing = !!pulsingTabs[t.id];
 
               const srcIndex = tabs.findIndex((x) => x.id === draggingId);
               const showGap = (gap: number) =>
@@ -250,7 +316,7 @@ export function TabBar({
                     >
                       <TabIcon tab={t} />
                       <TabRenameInput
-                        initial={labelFor(t)}
+                        initial={tabLabel(t)}
                         onCommit={(value) => {
                           onRename(t.id, value);
                           setEditingId(null);
@@ -280,7 +346,8 @@ export function TabBar({
                       fromId: t.id,
                       active: false,
                     };
-                    e.currentTarget.setPointerCapture(e.pointerId);
+                    captureElRef.current = null;
+                    // 超过拖拽阈值再 capture，避免通知/失焦打断单击后指针捕获卡住。
                   }}
                   onPointerMove={(e) => {
                     const st = drag.current;
@@ -289,6 +356,9 @@ export function TabBar({
                       if (Math.abs(e.clientX - st.startX) < 4) return;
                       st.active = true;
                       setDraggingId(st.fromId);
+                      const el = e.currentTarget;
+                      captureElRef.current = el;
+                      el.setPointerCapture(e.pointerId);
                       document.body.style.userSelect = "none";
                     }
                     e.preventDefault();
@@ -299,7 +369,7 @@ export function TabBar({
                     if (st?.active && dropGap !== null) {
                       onReorder(st.fromId, dropGap);
                     } else if (st && !st.active) {
-                      onSelect(t.id);
+                      selectTab(t.id);
                     }
                     endDrag(e.currentTarget);
                   }}
@@ -329,6 +399,7 @@ export function TabBar({
                   className={cn(
                     "group relative z-[1] h-7 shrink-0 justify-between gap-1.5 rounded-md bg-transparent text-xs transition-colors data-active:bg-transparent dark:data-active:bg-transparent",
                     isNew && "terax-tab-in",
+                    isPulsing && "terax-tab-finished-pulse",
                     isActive
                       ? "text-foreground dark:text-foreground"
                       : "text-muted-foreground hover:text-foreground/80 dark:text-muted-foreground",
@@ -446,7 +517,7 @@ export function TabBar({
                     {/* Preview tabs use italic to signal the transient state,
                         matching the visual convention from VSCode. */}
                     <span className={cn("truncate", isPreview && "italic")}>
-                      {labelFor(t)}
+                      {tabLabel(t)}
                     </span>
                     {t.kind === "editor" && t.dirty ? (
                       <span

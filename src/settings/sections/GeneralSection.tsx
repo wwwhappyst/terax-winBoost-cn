@@ -40,6 +40,7 @@ import {
   setAutostart,
   setDefaultWorkspaceEnv,
   setExplorerGitDecorations,
+  setFocusFollowsMouse,
   setLanguage,
   setRestoreWindowState,
   setShowHidden,
@@ -48,6 +49,7 @@ import {
   setTerminalFontSize,
   setTerminalFontWeight,
   setTerminalLetterSpacing,
+  setTerminalNumberedTabLabels,
   setTerminalScrollback,
   setTerminalShell,
   setTerminalWebglEnabled,
@@ -123,6 +125,10 @@ export function GeneralSection() {
   const zoomLevel = usePreferencesStore((s) => s.zoomLevel);
   const aiMiniZoom = usePreferencesStore((s) => s.aiMiniZoom);
   const agentNotifications = usePreferencesStore((s) => s.agentNotifications);
+  const focusFollowsMouse = usePreferencesStore((s) => s.focusFollowsMouse);
+  const terminalNumberedTabLabels = usePreferencesStore(
+    (s) => s.terminalNumberedTabLabels,
+  );
   const [pendingLanguage, setPendingLanguage] = useState<AppLanguage | null>(
     null,
   );
@@ -524,6 +530,15 @@ export function GeneralSection() {
             </SelectContent>
           </Select>
         </SettingRow>
+        <SettingRow
+          title="Numbered terminal tabs"
+          description="Name terminal tabs tab1, tab2, … instead of the folder name. Off by default to match upstream."
+        >
+          <Switch
+            checked={terminalNumberedTabLabels}
+            onCheckedChange={(v) => void setTerminalNumberedTabLabels(v)}
+          />
+        </SettingRow>
       </div>
 
       <div className="flex flex-col gap-2">
@@ -558,6 +573,15 @@ export function GeneralSection() {
             <Switch
               checked={restoreWindowState}
               onCheckedChange={(v) => void setRestoreWindowState(v)}
+            />
+          </SettingRow>
+          <SettingRow
+            title="Focus on hover"
+            description="Focus Terax after the pointer stays over the window for 0.8 seconds, without clicking."
+          >
+            <Switch
+              checked={focusFollowsMouse}
+              onCheckedChange={(v) => void setFocusFollowsMouse(v)}
             />
           </SettingRow>
         </div>

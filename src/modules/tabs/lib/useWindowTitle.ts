@@ -1,23 +1,14 @@
 import { useEffect } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { findLeafCwd } from "@/modules/terminal/lib/panes";
+import { usePreferencesStore } from "@/modules/settings/preferences";
+import { labelFor, terminalTabNumbers } from "./tabLabel";
 import type { Tab } from "./useTabs";
 
 const APP_NAME = "Terax";
 
 function basename(path: string): string {
   const parts = path.split(/[\\/]/).filter(Boolean);
-  return parts.length ? parts[parts.length - 1] : "/";
-}
-
-/** Label of the focused tab — for terminals, the active pane's folder. */
-function tabLabel(tab: Tab | undefined): string {
-  if (!tab) return "";
-  if (tab.kind === "terminal") {
-    const cwd = findLeafCwd(tab.paneTree, tab.activeLeafId) ?? tab.cwd;
-    return cwd ? basename(cwd) : tab.title;
-  }
-  return tab.title;
+  return parts.length ? parts[parts.length - 1]! : "/";
 }
 
 /**
@@ -25,16 +16,24 @@ function tabLabel(tab: Tab | undefined): string {
  * Spotify shows the current track instead of just the app name. Without this
  * the window keeps the build-time default ("Tauri App" on Linux).
  *
- * Format: `<project> — <tab>` (e.g. `terax-ai — src`), collapsing to just the
- * project when the focused terminal sits at the project root. Falls back to the
- * app name when there's nothing to show.
+ * Format: `<project> — <tab>`，页签名遵循 labelFor（默认 cwd，可选 tabN）。
  */
 export function useWindowTitle(
   activeTab: Tab | undefined,
   explorerRoot: string | null,
+  spaceTabs: Tab[] = [],
 ): void {
   const project = explorerRoot ? basename(explorerRoot) : "";
-  const label = tabLabel(activeTab);
+  const numberedLabels = usePreferencesStore(
+    (s) => s.terminalNumberedTabLabels,
+  );
+  const numbers = terminalTabNumbers(spaceTabs);
+  const label = activeTab
+    ? labelFor(activeTab, {
+        numberedLabels,
+        terminalNumber: numbers.get(activeTab.id),
+      })
+    : "";
 
   useEffect(() => {
     let title: string;

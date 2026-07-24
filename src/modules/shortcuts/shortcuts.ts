@@ -121,6 +121,7 @@ export const SHORTCUTS: Shortcut[] = [
     id: "tab.newEditor",
     label: "New editor tab",
     group: "Tabs",
+    // 终端聚焦时由 App shortcutsDisabled 放行，交给 shell/CLI（Ctrl+E = 行尾等）。
     defaultBindings: [{ [MOD_PROP]: true, key: "e" }],
   },
   {

@@ -1,4 +1,4 @@
-mod agent_detect;
+pub(crate) mod agent_detect;
 mod da_filter;
 mod session;
 pub(crate) mod shell_init;
@@ -34,6 +34,34 @@ impl Default for PtyState {
 impl PtyState {
     pub(super) fn take(&self, id: u32) -> Option<Arc<Session>> {
         self.sessions.write().unwrap().remove(&id)
+    }
+
+    /// 会话是否仍存在。
+    #[cfg(windows)]
+    pub fn has_session(&self, id: u32) -> bool {
+        self.sessions
+            .read()
+            .map(|s| s.contains_key(&id))
+            .unwrap_or(false)
+    }
+
+    /// 若 `pid` 的祖先链上存在某会话的 shell，返回该会话 id（取最近的匹配）。
+    #[cfg(windows)]
+    pub fn find_id_for_descendant(&self, pid: u32) -> Option<u32> {
+        let chain = crate::modules::agent::process_ancestor_chain(pid, 16);
+        let sessions = self.sessions.read().ok()?;
+        for ancestor in &chain {
+            for (id, session) in sessions.iter() {
+                if session.shell_pid == *ancestor && session.shell_pid != 0 {
+                    return Some(*id);
+                }
+            }
+        }
+        // 回退：仅一个活动会话时直接使用，避免进程树断裂导致 finished 丢失。
+        if sessions.len() == 1 {
+            return sessions.keys().next().copied();
+        }
+        None
     }
 }
 

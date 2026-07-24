@@ -123,7 +123,9 @@ pub fn spawn(
     };
     let pair = pty_system.openpty(size).map_err(|e| e.to_string())?;
 
-    let cmd = shell_init::build_command(cwd, workspace, blocks, shell)?;
+    let mut cmd = shell_init::build_command(cwd, workspace, blocks, shell)?;
+    // Windows hook 经命名管道回报时用此 id 精确路由，不依赖脆弱的进程树匹配。
+    cmd.env("TERAX_PTY_ID", id.to_string());
     let mut child = pair.slave.spawn_command(cmd).map_err(|e| e.to_string())?;
     drop(pair.slave);
 

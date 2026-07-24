@@ -4,6 +4,7 @@ const LABELS: Record<string, string> = {
   gemini: "Gemini",
   grok: "Grok",
   opencode: "OpenCode",
+  kimi: "Kimi",
   terax: "Terax",
 };
 

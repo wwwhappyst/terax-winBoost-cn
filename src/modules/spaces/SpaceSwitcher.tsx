@@ -7,7 +7,8 @@ import {
 import { cn } from "@/lib/utils";
 import { t as tr } from "@/modules/i18n";
 import { useShortcutLabel } from "@/modules/shortcuts";
-import { labelFor, type Tab, TabIcon } from "@/modules/tabs";
+import { labelFor, terminalTabNumbers, type Tab, TabIcon } from "@/modules/tabs";
+import { usePreferencesStore } from "@/modules/settings/preferences";
 import {
   ArrowDown01Icon,
   ArrowRight01Icon,
@@ -97,6 +98,7 @@ export function SpaceSwitcher({
 
   const drag = useRef<DragState | null>(null);
   const dropRef = useRef<DropTarget | null>(null);
+  const captureElRef = useRef<Element | null>(null);
   const [dragging, setDragging] = useState<{
     kind: "space" | "tab";
     id: string | number;
@@ -124,6 +126,9 @@ export function SpaceSwitcher({
     dragging?.kind === "space"
       ? (spaces.find((s) => s.id === dragging.id) ?? null)
       : null;
+  const numberedLabels = usePreferencesStore(
+    (s) => s.terminalNumberedTabLabels,
+  );
 
   useEffect(() => {
     if (!open || !activeId) return;
@@ -131,6 +136,35 @@ export function SpaceSwitcher({
       prev.has(activeId) ? prev : new Set(prev).add(activeId),
     );
   }, [open, activeId]);
+
+  // 失焦或快捷键时中断拖拽，避免捕获目标被卸载后鼠标失效。
+  useEffect(() => {
+    const abort = () => {
+      if (!drag.current) return;
+      const st = drag.current;
+      const el = captureElRef.current;
+      if (el) {
+        try {
+          el.releasePointerCapture?.(st.pointerId);
+        } catch {
+          // ignore
+        }
+      }
+      captureElRef.current = null;
+      drag.current = null;
+      dropRef.current = null;
+      setDragging(null);
+      setDrop(null);
+      setOverlay(null);
+      document.body.style.userSelect = "";
+    };
+    window.addEventListener("blur", abort);
+    window.addEventListener("keydown", abort, true);
+    return () => {
+      window.removeEventListener("blur", abort);
+      window.removeEventListener("keydown", abort, true);
+    };
+  }, []);
 
   const toggleExpand = (id: string) =>
     setExpanded((prev) => {
@@ -142,7 +176,14 @@ export function SpaceSwitcher({
 
   const endDrag = (el: Element) => {
     const st = drag.current;
-    if (st) el.releasePointerCapture?.(st.pointerId);
+    if (st) {
+      try {
+        el.releasePointerCapture?.(st.pointerId);
+      } catch {
+        // ignore
+      }
+    }
+    captureElRef.current = null;
     drag.current = null;
     dropRef.current = null;
     setDragging(null);
@@ -166,7 +207,8 @@ export function SpaceSwitcher({
       id,
       active: false,
     };
-    e.currentTarget.setPointerCapture(e.pointerId);
+    captureElRef.current = null;
+    // 超过拖拽阈值再 capture，避免失焦后指针捕获卡住导致整窗点不动。
   };
 
   const onPointerMove = (e: React.PointerEvent) => {
@@ -176,6 +218,8 @@ export function SpaceSwitcher({
       if (Math.hypot(e.clientX - st.startX, e.clientY - st.startY) < 5) return;
       st.active = true;
       setDragging({ kind: st.kind, id: st.id });
+      captureElRef.current = e.currentTarget;
+      e.currentTarget.setPointerCapture(e.pointerId);
       document.body.style.userSelect = "none";
     }
     e.preventDefault();
@@ -325,7 +369,15 @@ export function SpaceSwitcher({
                 label={draggedSpace.name}
               />
             ) : draggedTab ? (
-              <OverlayChip tab={draggedTab} label={labelFor(draggedTab)} />
+              <OverlayChip
+                tab={draggedTab}
+                label={labelFor(draggedTab, {
+                  numberedLabels,
+                  terminalNumber: terminalTabNumbers(
+                    tabsBySpace.get(draggedTab.spaceId) ?? [],
+                  ).get(draggedTab.id),
+                })}
+              />
             ) : null}
           </div>,
           document.body,
@@ -389,6 +441,10 @@ function SpaceRow({
   const moveTarget = drop?.kind === "into-space" && drop.spaceId === space.id;
   const reorderEdge =
     drop?.kind === "space" && drop.spaceId === space.id ? drop.edge : null;
+  const terminalNumbers = terminalTabNumbers(tabs);
+  const numberedLabels = usePreferencesStore(
+    (s) => s.terminalNumberedTabLabels,
+  );
 
   return (
     <div className={cn("relative", isDragging && "opacity-50")}>
@@ -482,6 +538,10 @@ function SpaceRow({
             <TabRow
               key={t.id}
               tab={t}
+              label={labelFor(t, {
+                numberedLabels,
+                terminalNumber: terminalNumbers.get(t.id),
+              })}
               dragging={dragging}
               drop={drop}
               onPointerDown={onPointerDown}
@@ -504,6 +564,7 @@ function SpaceRow({
 
 function TabRow({
   tab,
+  label,
   dragging,
   drop,
   onPointerDown,
@@ -513,6 +574,7 @@ function TabRow({
   onClose,
 }: {
   tab: Tab;
+  label: string;
   dragging: { kind: "space" | "tab"; id: string | number } | null;
   drop: DropTarget | null;
   onPointerDown: (
@@ -556,9 +618,7 @@ function TabRow({
       >
         <TabIcon tab={tab} />
         <span className="flex min-w-0 flex-1 flex-col">
-          <span className="truncate text-[11.5px] leading-tight">
-            {labelFor(tab)}
-          </span>
+          <span className="truncate text-[11.5px] leading-tight">{label}</span>
           {subtitle && (
             <span className="truncate text-[9.5px] leading-tight text-muted-foreground/55">
               {subtitle}

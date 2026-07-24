@@ -21,6 +21,7 @@ vi.mock("../store/agentStore", () => ({
 }));
 vi.mock("./notify", () => ({ osNotify: deps.osNotify }));
 
+import { consumePendingAgentActivate } from "./pendingActivate";
 import { routeAgentNotification } from "./route";
 
 function route(overrides: { focused: boolean; visible: boolean }) {
@@ -38,7 +39,10 @@ function route(overrides: { focused: boolean; visible: boolean }) {
 }
 
 describe("routeAgentNotification", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    consumePendingAgentActivate();
+  });
 
   it("records without popup when the completed agent is visible", () => {
     route({ focused: true, visible: true });
@@ -52,5 +56,26 @@ describe("routeAgentNotification", () => {
     expect(deps.pushNotification).toHaveBeenCalledOnce();
     expect(deps.showAgentToast).toHaveBeenCalledOnce();
     expect(deps.osNotify).not.toHaveBeenCalled();
+  });
+
+  it("queues activate and sends OS notify when the window is unfocused", () => {
+    const onActivate = vi.fn();
+    routeAgentNotification({
+      source: "terminal",
+      agent: "codex",
+      kind: "finished",
+      title: "Codex finished",
+      body: "workspace",
+      tabId: 1,
+      leafId: 2,
+      focused: false,
+      visible: false,
+      onActivate,
+    });
+    expect(deps.pushNotification).toHaveBeenCalledOnce();
+    expect(deps.osNotify).toHaveBeenCalledOnce();
+    expect(deps.showAgentToast).not.toHaveBeenCalled();
+    expect(consumePendingAgentActivate()).toBe(true);
+    expect(onActivate).toHaveBeenCalledOnce();
   });
 });

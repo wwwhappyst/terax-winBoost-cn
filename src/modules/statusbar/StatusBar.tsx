@@ -10,10 +10,16 @@ import {
   AiOpenButton,
   AiStatusBarControls,
 } from "@/modules/ai/components/AiStatusBarControls";
+import {
+  SearchInline,
+  type SearchInlineHandle,
+  type SearchTarget,
+} from "@/modules/header";
 import { LspStatusPill } from "@/modules/lsp";
 import type { WorkspaceEnv } from "@/modules/workspace";
 import { IncognitoIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import type { RefObject } from "react";
 import { CwdBreadcrumb } from "./CwdBreadcrumb";
 import { DiagnosticsBadge } from "./DiagnosticsBadge";
 import { WorkspaceEnvSelector } from "./WorkspaceEnvSelector";
@@ -28,6 +34,8 @@ type Props = {
   /** Only rendered when the AI panel is open and a key is loaded. */
   hasComposer: boolean;
   privateActive: boolean;
+  searchTarget: SearchTarget;
+  searchRef: RefObject<SearchInlineHandle | null>;
 };
 
 export function StatusBar({
@@ -39,12 +47,14 @@ export function StatusBar({
   onOpenMini,
   hasComposer,
   privateActive,
+  searchTarget,
+  searchRef,
 }: Props) {
   const panelOpen = useChatStore((s) => s.panelOpen);
   const openPanel = useChatStore((s) => s.openPanel);
 
   return (
-    <footer className="flex h-8 shrink-0 items-center justify-between gap-3 border-t border-border/60 bg-card/60 pl-3 pr-4 text-[11px]">
+    <footer className="flex h-8 shrink-0 items-center justify-between gap-3 border-t border-border/60 bg-card/60 pl-3 pr-3 text-[11px]">
       <div className="flex min-w-0 flex-1 items-center gap-2">
         <WorkspaceEnvSelector onSelect={onWorkspaceChange} />
         <CwdBreadcrumb cwd={cwd} filePath={filePath} home={home} onCd={onCd} />
@@ -69,6 +79,7 @@ export function StatusBar({
         ) : null}
       </div>
       <div className="flex shrink-0 items-center gap-1.5">
+        <SearchInline ref={searchRef} target={searchTarget} compact />
         <AgentStatusPill onClick={onOpenMini} />
         {panelOpen && hasComposer ? (
           <AiStatusBarControls />

@@ -1,6 +1,6 @@
 [package]
 name = "terax"
-version = "0.8.5"
+version = "0.8.5-0.8"
 description = "Terax — an open-source AI-native terminal emulator"
 authors = ["crynta"]
 license = "Apache-2.0"
@@ -74,8 +74,10 @@ keyring = { version = "3.6", default-features = false, features = [
 windows-sys = { version = "0.61", features = [
 	"Win32_Foundation",
 	"Win32_Security",
+	"Win32_Storage_FileSystem",
 	"Win32_System_Console",
 	"Win32_System_JobObjects",
+	"Win32_System_Pipes",
 	"Win32_System_ProcessStatus",
 	"Win32_System_Threading",
 	"Win32_System_Diagnostics_ToolHelp",

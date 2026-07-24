@@ -27,6 +27,19 @@ stats.html
 
 *.tsbuildinfo
 
-# 本地维护文档，不纳入个人 Fork
+# 本地维护文档 / Agent 规则，不纳入公开仓库
+AGENTS.md
 docs/envs.md
 docs/exec_mode.md
+docs/handoff.md
+
+# 环境变量与本地密钥（勿提交）
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+*.pfx
+*.key
+tauri.key
+tauri.key.pub

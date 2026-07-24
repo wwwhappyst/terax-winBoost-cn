@@ -3,6 +3,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import { useAgentStore } from "@/modules/agents/store/agentStore";
 import type { SearchAddon } from "@xterm/addon-search";
 import { Fragment } from "react";
 import { useTerminalDropStore } from "./lib/dropStore";
@@ -41,6 +42,13 @@ export function PaneTreeView(props: Props) {
         onFocus={() => {
           if (!focused) onFocusLeaf(node.id);
         }}
+        onMouseEnter={() => useAgentStore.getState().clearPulse(node.id)}
+        onMouseMove={() => {
+          // 指针已在分屏内时 mouseenter 不会再触发；移动一下即可确认并停闪。
+          if (useAgentStore.getState().pulsingLeaves[node.id]) {
+            useAgentStore.getState().clearPulse(node.id);
+          }
+        }}
         data-pane-leaf={node.id}
         className="relative h-full w-full"
       >
@@ -56,6 +64,7 @@ export function PaneTreeView(props: Props) {
           onExit={b.onExit}
         />
         <DropOverlay leafId={node.id} />
+        <FinishedPulse leafId={node.id} />
       </div>
     );
   }
@@ -86,5 +95,17 @@ function DropOverlay({ leafId }: { leafId: number }) {
     <div className="pointer-events-none absolute inset-2 grid place-items-center rounded-lg border border-primary/45 bg-background/70 text-xs font-medium text-foreground shadow-lg backdrop-blur-sm">
       Drop file path here
     </div>
+  );
+}
+
+/** CLI 完成后主题色慢闪描边；仅该 leaf，悬停或指针移动后消失。 */
+function FinishedPulse({ leafId }: { leafId: number }) {
+  const pulsing = useAgentStore((s) => !!s.pulsingLeaves[leafId]);
+  if (!pulsing) return null;
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none absolute inset-0 z-20 rounded-sm terax-finished-pulse"
+    />
   );
 }

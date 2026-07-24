@@ -97,6 +97,9 @@ import {
 } from "./components/WorkspaceInputBar";
 import { WorkspaceSurface } from "./components/WorkspaceSurface";
 import { useAppCloseGuard } from "./hooks/useAppCloseGuard";
+import { useExternalLinkGuard } from "./hooks/useExternalLinkGuard";
+import { useFocusFollowsMouse } from "./hooks/useFocusFollowsMouse";
+import { useInputRecovery } from "./hooks/useInputRecovery";
 import { useTabCloseGuards } from "./hooks/useTabCloseGuards";
 import { useWorkspaceSwitcher } from "./hooks/useWorkspaceSwitcher";
 
@@ -321,7 +324,7 @@ export default function App() {
     launchCwd ?? home,
   );
 
-  useWindowTitle(activeTab, explorerRoot);
+  useWindowTitle(activeTab, explorerRoot, spaceTabs);
 
   useEffect(() => {
     setActiveSearchAddon(
@@ -368,6 +371,9 @@ export default function App() {
 
   const { pendingAppClose, confirmAppClose, cancelAppClose } =
     useAppCloseGuard(tabsRef);
+  useFocusFollowsMouse();
+  useExternalLinkGuard();
+  useInputRecovery();
 
   useEffect(() => {
     const live = new Set<number>();
@@ -796,6 +802,13 @@ export default function App() {
         // is the always-on toggle and is never claimed by the terminal.
         return inTerminal && !e.shiftKey;
       }
+      if (id === "tab.newEditor") {
+        // Ctrl+E 在 shell/readline 中是行尾；各 CLI 也常用作自身快捷键。
+        // 终端聚焦时放行，避免被「新建编辑器」抢走。
+        const target =
+          (e.target as HTMLElement | null) ?? document.activeElement;
+        return !!(target as HTMLElement | null)?.closest?.(".xterm");
+      }
       return false;
     },
     [activeTab],
@@ -1128,8 +1141,6 @@ export default function App() {
               onActivateLocalAgent={onActivateLocalAgent}
               onOpenSettings={() => void openSettingsWindow()}
               spaceSwitcher={spaceSwitcher}
-              searchTarget={searchTarget}
-              searchRef={searchInlineRef}
               onOverrideLanguage={setOverrideLanguage}
             />
           )}
@@ -1247,6 +1258,8 @@ export default function App() {
               privateActive={
                 activeTab?.kind === "terminal" && activeTab.private === true
               }
+              searchTarget={searchTarget}
+              searchRef={searchInlineRef}
             />
           )}
 

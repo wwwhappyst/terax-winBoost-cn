@@ -20,6 +20,7 @@ import {
   terminalLineNavigationSequence,
   terminalWordNavigationSequence,
 } from "./keymap";
+import { attachImeAnchor, type ImeAnchorHandle } from "./imeAnchor";
 
 export const POOL_MAX_SIZE = 5;
 const FIT_DEBOUNCE_MS = 8;
@@ -61,6 +62,11 @@ export type Slot = {
   retainedLeafId: number | null;
   parked: boolean;
   oscDisposers: (() => void)[];
+  // 应用通过 DECSET 开启的私有模式实时跟踪（鼠标上报、括号粘贴等）。
+  // term.reset() 会把这些模式全部复位，而运行中的 TUI 不会重发开启序列，
+  // 快照序列化也不包含它们——不跟踪恢复的话，slot 重建后鼠标点击/滚轮全失效。
+  liveModes: Set<number>;
+  imeAnchor: ImeAnchorHandle | null;
   observer: ResizeObserver | null;
   fitTimer: ReturnType<typeof setTimeout> | null;
   ptyTimer: ReturnType<typeof setTimeout> | null;
@@ -166,6 +172,13 @@ function getRecycler(): HTMLDivElement {
 const MCR_BG_ACTIVE = 4.5;
 const MCR_BG_INACTIVE = 1;
 
+// 可在重绑时安全恢复的上报类 DEC 私有模式。刻意排除切缓冲区/存光标的
+// 模式（47/1047/1048/1049）：快照回放假设仍在主缓冲区，alt-screen 的恢复
+// 走 SIGWINCH 重绘路径（见 bindSlot 的 altScreen 分支）。
+const RESTORABLE_MODES = new Set([
+  9, 1000, 1001, 1002, 1003, 1004, 1005, 1006, 1015, 1016, 2004,
+]);
+
 function bgActive(
   prefs: ReturnType<typeof usePreferencesStore.getState>,
 ): boolean {
@@ -214,6 +227,7 @@ function createSlot(): Slot {
   host.setAttribute("data-terax-slot", String(slots.length));
   getRecycler().appendChild(host);
   term.open(host);
+  const imeAnchor = attachImeAnchor(term);
 
   const slot: Slot = {
     id: slots.length,
@@ -228,6 +242,8 @@ function createSlot(): Slot {
     retainedLeafId: null,
     parked: false,
     oscDisposers: [],
+    liveModes: new Set(),
+    imeAnchor,
     observer: null,
     fitTimer: null,
     ptyTimer: null,
@@ -240,6 +256,25 @@ function createSlot(): Slot {
     lastH: 0,
     lastUsedAt: 0,
   };
+
+  // 挂钩 DECSET/DECRST 与 RIS，实时维护 liveModes（返回 false 放行默认处理）。
+  const trackModes = (enable: boolean) => (params: (number | number[])[]) => {
+    for (const p of params) {
+      if (typeof p !== "number" || p <= 0) continue;
+      if (enable) slot.liveModes.add(p);
+      else slot.liveModes.delete(p);
+    }
+    return false;
+  };
+  term.parser.registerCsiHandler({ prefix: "?", final: "h" }, trackModes(true));
+  term.parser.registerCsiHandler(
+    { prefix: "?", final: "l" },
+    trackModes(false),
+  );
+  term.parser.registerEscHandler({ final: "c" }, () => {
+    slot.liveModes.clear();
+    return false;
+  });
 
   term.attachCustomKeyEventHandler((event) => {
     // During IME composition the browser is assembling a multi-keystroke
@@ -385,6 +420,9 @@ export type AcquireParams = {
   // at the time it was released. When set, bindSlot skips ring replay
   // and kicks SIGWINCH so the TUI repaints from scratch.
   altScreen: boolean;
+  // 序列化时保存的上报类 DEC 私有模式（来自上一次 storeSnapshot），
+  // 重绑 reset 之后由 bindSlot 重新写入终端。
+  modes: number[];
   drainRing: (write: (bytes: Uint8Array) => void) => void;
   shellExited: boolean;
   searchQuery: string | null;
@@ -461,6 +499,16 @@ function bindSlot(slot: Slot, p: AcquireParams): void {
   if (!fast) {
     slot.term.clear();
     slot.term.reset();
+    slot.liveModes.clear();
+    // 恢复运行中的 TUI 开启的鼠标上报/焦点事件/括号粘贴等模式：上面的
+    // reset 已将其复位，而 TUI 只在启动时发一次开启序列；不恢复则该 leaf
+    // 的鼠标点击与滚轮全部失效（键盘不受影响），只能退出 TUI 重启。
+    const modes = p.modes.filter((m) => RESTORABLE_MODES.has(m));
+    if (modes.length > 0) {
+      try {
+        slot.term.write(`\x1b[?${modes.join(";")}h`);
+      } catch {}
+    }
 
     if (
       p.cols > 0 &&
@@ -623,6 +671,8 @@ export type SerializeOutput = {
   cols: number;
   rows: number;
   altScreen: boolean;
+  // 序列化时刻开启的上报类 DEC 私有模式，重绑时在 reset 之后恢复。
+  modes: number[];
 };
 
 export type ReleaseOutput = { cols: number; rows: number };
@@ -650,6 +700,7 @@ function serializeSlot(slot: Slot): SerializeOutput {
     cols: slot.term.cols,
     rows: slot.term.rows,
     altScreen: isAltScreen(slot),
+    modes: [...slot.liveModes].filter((m) => RESTORABLE_MODES.has(m)),
   };
 }
 
@@ -755,6 +806,10 @@ function disposeSlot(slot: Slot): void {
     } catch {}
   }
   slot.oscDisposers = [];
+  try {
+    slot.imeAnchor?.detach();
+  } catch {}
+  slot.imeAnchor = null;
   disposeSlotWebgl(slot);
   try {
     slot.term.dispose();
@@ -1037,6 +1092,13 @@ export function discardRetainedSlot(leafId: number): void {
   discardRetention(slot);
   slot.term.clear();
   slot.term.reset();
+  slot.liveModes.clear();
+}
+
+// 池外直接 term.reset() 的调用方（如 respawnSession）随后调用本函数，
+// 清空模式跟踪，避免把旧 TUI 的上报模式错误恢复给新 shell。
+export function clearSlotLiveModes(slot: Slot): void {
+  slot.liveModes.clear();
 }
 
 export function getLiveSlotForLeaf(leafId: number): Slot | null {

@@ -7,4 +7,8 @@ describe("displayAgent", () => {
     expect(displayAgent("grok")).toBe("Grok");
     expect(displayAgent("opencode")).toBe("OpenCode");
   });
+
+  it("formats Kimi product name", () => {
+    expect(displayAgent("kimi")).toBe("Kimi");
+  });
 });
