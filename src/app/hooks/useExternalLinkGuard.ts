@@ -9,7 +9,9 @@ export function useExternalLinkGuard(): void {
   useEffect(() => {
     const onClick = (event: MouseEvent) => {
       if (event.defaultPrevented || event.button !== 0) return;
-      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      // 不放行 Ctrl/Cmd/Shift/Alt + 点击：浏览器里这些组合是「新标签页/新窗口」，
+      // 在 WebView2 中新窗口请求会被拦截且不会完成，页面随即整体失去响应。
+      // 无论按没按修饰键，一律拦下改用系统浏览器打开。
       const target = event.target;
       if (!(target instanceof Element)) return;
       const anchor = target.closest("a[href]");

@@ -199,6 +199,15 @@ function termOptions() {
     scrollback: prefs.terminalScrollback,
     allowProposedApi: true,
     minimumContrastRatio: bgActive(prefs) ? MCR_BG_ACTIVE : MCR_BG_INACTIVE,
+    // OSC 8 超链接（CLI 用转义序列标注的可点击链接）由 xterm 内核的
+    // OscLinkProvider 处理，走不到 WebLinksAddon 的回调。不接管的话内核会
+    // 兜底执行 confirm() + window.open()：WebView2 里新窗口被拦截，页面卡在
+    // 该流程上，表现为整个应用点击/输入/滚动全部失效。统一改用系统浏览器。
+    linkHandler: {
+      activate: (_event: MouseEvent, uri: string) => {
+        void openUrl(uri).catch(console.error);
+      },
+    },
   };
 }
 
