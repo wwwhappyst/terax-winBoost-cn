@@ -11,6 +11,10 @@ on:
 
 jobs:
   update:
+    # 仅上游官方仓库维护 nix/sources.json。
+    # 个人 Fork 的版本号为 {上游}-{小改版}，且不发布 deb/app.tar.gz，
+    # 若在此仓库随 release 触发会因 crynta/terax-ai 上不存在对应 tag 而失败。
+    if: github.repository == 'crynta/terax-ai'
     runs-on: ubuntu-latest
     permissions:
       contents: write
