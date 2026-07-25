@@ -2,7 +2,7 @@
 
 基于 Terax 上游项目的个人 Windows 改造版本。
 
-[下载 Releases](https://github.com/wwwhappyst/terax-ai/releases) · [上游仓库](https://github.com/crynta/terax-ai) · [本 Fork 仓库](https://github.com/wwwhappyst/terax-ai)
+[下载 Releases](https://github.com/wwwhappyst/terax-winBoost-cn/releases) · [上游仓库](https://github.com/crynta/terax-ai) · [本 Fork 仓库](https://github.com/wwwhappyst/terax-winBoost-cn)
 
 ---
 
@@ -41,7 +41,7 @@ Terax 是一个基于 Tauri 2、Rust 和 React 19 的 AI 原生终端工作区�
 
 ## 下载与安装
 
-请前往[本 Fork 的 Releases 页面](https://github.com/wwwhappyst/terax-ai/releases)下载。
+请前往[本 Fork 的 Releases 页面](https://github.com/wwwhappyst/terax-winBoost-cn/releases)下载。
 
 当前个人 Release 只提供以下安装包：
 
