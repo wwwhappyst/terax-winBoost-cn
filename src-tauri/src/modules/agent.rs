@@ -643,17 +643,18 @@ pub fn send_notify_ipc(agent: &str, event: &str) -> bool {
     use windows_sys::Win32::System::Threading::GetCurrentProcessId;
 
     let pid = unsafe { GetCurrentProcessId() };
+    // 进程树校验必须在助手进程内完成：本进程写完管道立即退出，主进程在独立
+    // 线程里再做 Toolhelp 快照时通常已查不到任何映像名，claude 会被「断链
+    // 拒绝」整批丢掉（日志表现为 `reject unverified claude claim names=[]`）。
+    let tree = u8::from(caller_matches_agent(agent, pid));
     // 始终带上调用方 pid，便于主进程校验「钩子 agent」与真实进程树是否一致。
     // 若 shell 继承了 TERAX_PTY_ID，再附带 pty 以便精确路由。
-    let payload = if let Ok(pty) = std::env::var("TERAX_PTY_ID") {
-        let pty = pty.trim();
-        if !pty.is_empty() {
-            format!("{agent} {event} pty:{pty} pid:{pid}\n")
-        } else {
-            format!("{agent} {event} pid:{pid}\n")
-        }
+    let pty = std::env::var("TERAX_PTY_ID").unwrap_or_default();
+    let pty = pty.trim();
+    let payload = if pty.is_empty() {
+        format!("{agent} {event} pid:{pid} tree:{tree}\n")
     } else {
-        format!("{agent} {event} pid:{pid}\n")
+        format!("{agent} {event} pty:{pty} pid:{pid} tree:{tree}\n")
     };
     let wide: Vec<u16> = NOTIFY_PIPE_NAME
         .encode_utf16()
@@ -676,9 +677,13 @@ pub fn send_notify_ipc(agent: &str, event: &str) -> bool {
     false
 }
 
-/// 解析 hook IPC 报文：`agent event [pty:ID] pid:PID`（兼容旧 `agent event PID` / 仅 pty）。
+/// 解析 hook IPC 报文：`agent event [pty:ID] pid:PID [tree:0|1]`
+/// （兼容旧 `agent event PID` / 仅 pty / 不带 tree 的报文）。
+/// `tree` 是助手进程在自身存活时算出的进程树校验结论。
 #[cfg(any(windows, test))]
-fn parse_notify_ipc(line: &str) -> Option<(&str, &str, NotifyTarget, Option<u32>)> {
+fn parse_notify_ipc(
+    line: &str,
+) -> Option<(&str, &str, NotifyTarget, Option<u32>, Option<bool>)> {
     let mut parts = line.split_whitespace();
     let agent = parts.next()?;
     let event = parts.next()?;
@@ -688,11 +693,18 @@ fn parse_notify_ipc(line: &str) -> Option<(&str, &str, NotifyTarget, Option<u32>
 
     let mut pty: Option<u32> = None;
     let mut pid: Option<u32> = None;
+    let mut tree: Option<bool> = None;
     for token in parts {
         if let Some(id) = token.strip_prefix("pty:") {
             pty = Some(id.parse().ok()?);
         } else if let Some(id) = token.strip_prefix("pid:") {
             pid = Some(id.parse().ok()?);
+        } else if let Some(flag) = token.strip_prefix("tree:") {
+            tree = Some(match flag {
+                "1" => true,
+                "0" => false,
+                _ => return None,
+            });
         } else if let Ok(id) = token.parse::<u32>() {
             // 旧格式：`agent event PID`
             pid = Some(id);
@@ -708,7 +720,7 @@ fn parse_notify_ipc(line: &str) -> Option<(&str, &str, NotifyTarget, Option<u32>
     } else {
         return None;
     };
-    Some((agent, event, target, pid))
+    Some((agent, event, target, pid, tree))
 }
 
 #[cfg(any(windows, test))]
@@ -810,20 +822,23 @@ fn handle_notify_client(app: tauri::AppHandle, handle: windows_sys::Win32::Found
         return;
     }
     let line = String::from_utf8_lossy(&buf[..n as usize]);
-    let Some((agent, event, target, caller_pid)) = parse_notify_ipc(line.trim()) else {
+    let Some((agent, event, target, caller_pid, tree)) = parse_notify_ipc(line.trim()) else {
         log::debug!("agent notify: bad payload {:?}", line.trim());
         return;
     };
 
     // Grok 兼容加载 ~/.claude/settings.json：Claude 钩子会在 Grok 回合里误报。
-    // 用调用方进程树校验 agent，拒绝明显串台的通知。
-    if let Some(pid) = caller_pid {
-        if !caller_matches_agent(agent, pid) {
-            log::info!(
-                "agent notify: ignore mismatched agent={agent} event={event} pid={pid}"
-            );
-            return;
-        }
+    // 用调用方进程树校验 agent，拒绝明显串台的通知。助手进程已把结论算在报文里
+    // （它退出后这里再查进程树只会得到空结果），仅旧报文才回退到本地重算。
+    let matches = match tree {
+        Some(ok) => ok,
+        None => caller_pid.is_none_or(|pid| caller_matches_agent(agent, pid)),
+    };
+    if !matches {
+        log::info!(
+            "agent notify: ignore mismatched agent={agent} event={event} pid={caller_pid:?}"
+        );
+        return;
     }
 
     let Some(state) = app.try_state::<crate::modules::pty::PtyState>() else {
@@ -1417,22 +1432,47 @@ timeout = 10
     fn parse_notify_ipc_accepts_agent_event_pid() {
         assert_eq!(
             parse_notify_ipc("grok finished 4242"),
-            Some(("grok", "finished", NotifyTarget::Pid(4242), Some(4242)))
+            Some(("grok", "finished", NotifyTarget::Pid(4242), Some(4242), None))
         );
         assert_eq!(
             parse_notify_ipc("grok finished pid:4242"),
-            Some(("grok", "finished", NotifyTarget::Pid(4242), Some(4242)))
+            Some(("grok", "finished", NotifyTarget::Pid(4242), Some(4242), None))
         );
         assert_eq!(
             parse_notify_ipc("kimi finished pty:7"),
-            Some(("kimi", "finished", NotifyTarget::Pty(7), None))
+            Some(("kimi", "finished", NotifyTarget::Pty(7), None, None))
         );
         assert_eq!(
             parse_notify_ipc("kimi finished pty:7 pid:99"),
-            Some(("kimi", "finished", NotifyTarget::Pty(7), Some(99)))
+            Some(("kimi", "finished", NotifyTarget::Pty(7), Some(99), None))
         );
         assert!(parse_notify_ipc("grok finished").is_none());
         assert!(parse_notify_ipc("grok finished 1 extra").is_none());
+    }
+
+    #[test]
+    fn parse_notify_ipc_reads_tree_verdict() {
+        assert_eq!(
+            parse_notify_ipc("claude finished pty:3 pid:99 tree:1"),
+            Some((
+                "claude",
+                "finished",
+                NotifyTarget::Pty(3),
+                Some(99),
+                Some(true)
+            ))
+        );
+        assert_eq!(
+            parse_notify_ipc("claude finished pid:99 tree:0"),
+            Some((
+                "claude",
+                "finished",
+                NotifyTarget::Pid(99),
+                Some(99),
+                Some(false)
+            ))
+        );
+        assert!(parse_notify_ipc("claude finished pid:99 tree:maybe").is_none());
     }
 
     #[test]
